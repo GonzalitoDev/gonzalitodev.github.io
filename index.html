@@ -1,0 +1,1684 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Security Lab - NFWL.exe</title>
+    <style>
+        /* 
+         * Web Security Lab - NFWL.exe
+         * ENTORNO EDUCATIVO - SOLO PARA FINES DE APRENDIZAJE
+         * Este es un laboratorio controlado sin conexión a servidores reales
+         */
+        
+        :root {
+            --primary: #00ff41;
+            --secondary: #008f11;
+            --dark: #0d0208;
+            --darker: #050505;
+            --alert: #ff0040;
+            --warning: #ffaa00;
+            --info: #00aaff;
+            --glass: rgba(0, 255, 65, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100vh); }
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 5px var(--primary); }
+            50% { box-shadow: 0 0 20px var(--primary), 0 0 40px var(--secondary); }
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: var(--darker);
+            color: var(--primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Efecto de scanline */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                transparent 50%,
+                rgba(0, 255, 65, 0.025) 50%
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        /* Scanline animada */
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: rgba(0, 255, 65, 0.3);
+            box-shadow: 0 0 10px var(--primary);
+            animation: scanline 4s linear infinite;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        /* Header */
+        .header {
+            background: var(--dark);
+            border-bottom: 2px solid var(--primary);
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 20px rgba(0, 255, 65, 0.2);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-shadow: 0 0 10px var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo::before {
+            content: '>';
+            animation: blink 1s infinite;
+        }
+
+        .status-bar {
+            display: flex;
+            gap: 2rem;
+            font-size: 0.9rem;
+            flex-wrap: wrap;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-label {
+            color: var(--secondary);
+        }
+
+        .status-value {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .hearts {
+            color: var(--alert);
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 200px;
+            height: 20px;
+            background: var(--darker);
+            border: 1px solid var(--primary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary), var(--primary));
+            transition: width 0.5s ease;
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.7rem;
+            color: var(--dark);
+            font-weight: bold;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 2rem;
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Cards */
+        .card {
+            background: var(--dark);
+            border: 1px solid var(--primary);
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 65, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .card:hover::before {
+            left: 100%;
+        }
+
+        .card-header {
+            background: rgba(0, 255, 65, 0.1);
+            padding: 1rem;
+            border-bottom: 1px solid var(--primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border: 1px solid;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+
+        .badge-locked {
+            border-color: var(--alert);
+            color: var(--alert);
+        }
+
+        .badge-unlocked {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .badge-completed {
+            border-color: var(--secondary);
+            color: var(--secondary);
+            background: rgba(0, 143, 17, 0.2);
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--secondary);
+            font-size: 0.9rem;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--darker);
+            border: 1px solid var(--secondary);
+            color: var(--primary);
+            font-family: inherit;
+            font-size: 0.9rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button:hover:not(:disabled) {
+            background: var(--primary);
+            color: var(--dark);
+            box-shadow: 0 0 20px var(--primary);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-danger {
+            border-color: var(--alert);
+            color: var(--alert);
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background: var(--alert);
+            color: white;
+        }
+
+        .btn-warning {
+            border-color: var(--warning);
+            color: var(--warning);
+        }
+
+        .btn-warning:hover:not(:disabled) {
+            background: var(--warning);
+            color: var(--dark);
+        }
+
+        /* Terminal */
+        .terminal {
+            background: var(--darker);
+            border: 1px solid var(--primary);
+            height: 500px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .terminal-header {
+            background: rgba(0, 255, 65, 0.1);
+            padding: 0.5rem 1rem;
+            border-bottom: 1px solid var(--primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .terminal-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .terminal-btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: none;
+        }
+
+        .terminal-btn.red { background: var(--alert); }
+        .terminal-btn.yellow { background: var(--warning); }
+        .terminal-btn.green { background: var(--primary); }
+
+        .terminal-body {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        .terminal-input-line {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .terminal-prompt {
+            color: var(--secondary);
+            white-space: nowrap;
+        }
+
+        .terminal-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--primary);
+            font-family: inherit;
+            font-size: 0.85rem;
+            outline: none;
+        }
+
+        .terminal-output {
+            margin-bottom: 0.5rem;
+            word-wrap: break-word;
+        }
+
+        .terminal-output.error { color: var(--alert); }
+        .terminal-output.success { color: var(--primary); }
+        .terminal-output.info { color: var(--info); }
+        .terminal-output.warning { color: var(--warning); }
+
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 15px;
+            background: var(--primary);
+            animation: blink 1s infinite;
+            vertical-align: middle;
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 1rem;
+            border: 1px solid;
+            margin-bottom: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .alert::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+        }
+
+        .alert-error {
+            border-color: var(--alert);
+            background: rgba(255, 0, 64, 0.1);
+        }
+
+        .alert-error::before { background: var(--alert); }
+
+        .alert-success {
+            border-color: var(--primary);
+            background: rgba(0, 255, 65, 0.1);
+        }
+
+        .alert-success::before { background: var(--primary); }
+
+        .alert-warning {
+            border-color: var(--warning);
+            background: rgba(255, 170, 0, 0.1);
+        }
+
+        .alert-warning::before { background: var(--warning); }
+
+        /* Hidden content */
+        .hidden-panel {
+            display: none;
+            animation: glitch 0.3s;
+        }
+
+        .hidden-panel.active {
+            display: block;
+        }
+
+        /* Admin panel simulation */
+        .admin-panel {
+            background: linear-gradient(135deg, rgba(255, 0, 64, 0.1), rgba(255, 170, 0, 0.1));
+            border: 2px solid var(--alert);
+        }
+
+        .flag {
+            background: var(--darker);
+            border: 1px dashed var(--primary);
+            padding: 1rem;
+            text-align: center;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            margin: 1rem 0;
+            font-family: monospace;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .flag::before {
+            content: 'FLAG CAPTURED';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 65, 0.3), transparent);
+            animation: shine 2s infinite;
+        }
+
+        @keyframes shine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        /* Comments section for stored XSS */
+        .comments-section {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid var(--secondary);
+            padding: 1rem;
+            margin-top: 1rem;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .comment {
+            border-bottom: 1px solid var(--secondary);
+            padding: 0.75rem 0;
+            margin-bottom: 0.75rem;
+        }
+
+        .comment:last-child {
+            border-bottom: none;
+        }
+
+        .comment-author {
+            color: var(--secondary);
+            font-size: 0.8rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .comment-text {
+            color: var(--primary);
+            word-wrap: break-word;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--dark);
+            border: 2px solid var(--primary);
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            animation: glitch 0.3s;
+        }
+
+        .modal-header {
+            background: rgba(0, 255, 65, 0.1);
+            padding: 1rem;
+            border-bottom: 1px solid var(--primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Hints */
+        .hint-box {
+            background: rgba(0, 170, 255, 0.1);
+            border: 1px solid var(--info);
+            padding: 1rem;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .hint-box.visible {
+            display: block;
+            animation: glitch 0.3s;
+        }
+
+        /* Source code viewer */
+        .source-viewer {
+            background: var(--darker);
+            border: 1px solid var(--secondary);
+            padding: 1rem;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .source-viewer.visible {
+            display: block;
+        }
+
+        .source-line {
+            display: flex;
+        }
+
+        .line-number {
+            color: var(--secondary);
+            min-width: 30px;
+            user-select: none;
+            padding-right: 1rem;
+            border-right: 1px solid var(--secondary);
+            margin-right: 1rem;
+        }
+
+        .line-content {
+            color: var(--primary);
+            white-space: pre;
+        }
+
+        .code-comment { color: var(--secondary); }
+        .code-string { color: var(--warning); }
+        .code-keyword { color: var(--info); }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .status-bar {
+                justify-content: center;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .card-body {
+                padding: 1rem;
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--darker);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--secondary);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+
+        /* Achievement notification */
+        .achievement {
+            position: fixed;
+            top: 80px;
+            right: -400px;
+            background: var(--dark);
+            border: 2px solid var(--primary);
+            padding: 1rem;
+            max-width: 350px;
+            z-index: 500;
+            transition: right 0.5s ease;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+        }
+
+        .achievement.show {
+            right: 20px;
+        }
+
+        .achievement-title {
+            color: var(--primary);
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .achievement-desc {
+            color: var(--secondary);
+            font-size: 0.85rem;
+        }
+
+        /* Easter egg */
+        .konami {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+            z-index: 2000;
+            animation: glitch 0.1s infinite;
+            text-shadow: 0 0 20px var(--primary);
+        }
+
+        .konami.active {
+            display: block;
+        }
+
+        /* Logs */
+        .log-entry {
+            font-size: 0.75rem;
+            color: var(--secondary);
+            border-left: 2px solid var(--secondary);
+            padding-left: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .log-entry.new {
+            color: var(--primary);
+            border-left-color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="scanline"></div>
+    
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">NFWL.exe // Web Security Lab</div>
+            <div class="status-bar">
+                <div class="status-item">
+                    <span class="status-label">NIVEL:</span>
+                    <span class="status-value" id="currentLevel">1</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">VIDAS:</span>
+                    <span class="status-value hearts" id="livesDisplay">❤️❤️❤️</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">PROGRESO:</span>
+                    <div class="progress-container">
+                        <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+                        <span class="progress-text" id="progressText">0%</span>
+                    </div>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">FLAGS:</span>
+                    <span class="status-value" id="flagsCount">0/6</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Achievement Notification -->
+    <div class="achievement" id="achievement">
+        <div class="achievement-title">🏆 LOGRO DESBLOQUEADO</div>
+        <div class="achievement-desc" id="achievementText"></div>
+    </div>
+
+    <!-- Konami Easter Egg -->
+    <div class="konami" id="konami">👾 MODO DIOS ACTIVADO 👾</div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Left Column: Challenges -->
+        <div class="challenges">
+            
+            <!-- Challenge 1: SQL Injection Login -->
+            <div class="card" id="challenge1">
+                <div class="card-header">
+                    <div class="card-title">🔐 NIVEL 1: Login Vulnerable</div>
+                    <span class="badge badge-locked" id="badge1">BLOQUEADO</span>
+                </div>
+                <div class="card-body">
+                    <p style="margin-bottom: 1rem; color: var(--secondary);">
+                        Accede al sistema utilizando técnicas de SQL Injection. 
+                        El sistema es vulnerable a inyección en el campo de usuario.
+                    </p>
+                    
+                    <div class="alert alert-warning">
+                        <strong>Pista:</strong> Intenta usar comillas simples y operadores lógicos SQL.
+                    </div>
+
+                    <form id="loginForm" onsubmit="return checkLogin(event)">
+                        <div class="form-group">
+                            <label>Usuario</label>
+                            <input type="text" id="loginUser" placeholder="admin" autocomplete="off">
+                        </div>
+                        <div class="form-group">
+                            <label>Contraseña</label>
+                            <input type="password" id="loginPass" placeholder="••••••">
+                        </div>
+                        <button type="submit">INICIAR SESIÓN</button>
+                        <button type="button" class="btn-warning" onclick="toggleHint(1)" style="margin-left: 0.5rem;">💡 PISTA</button>
+                    </form>
+
+                    <div class="hint-box" id="hint1">
+                        <strong>PISTA:</strong> Prueba con <code>' OR '1'='1</code> en el campo de usuario. 
+                        Esto cierra la consulta SQL y añade una condición siempre verdadera.
+                    </div>
+
+                    <div id="loginSuccess" class="hidden-panel" style="margin-top: 1rem;">
+                        <div class="alert alert-success">
+                            <strong>✓ ACCESO CONCEDIDO</strong><br>
+                            Bienvenido, administrador.
+                        </div>
+                        <div class="flag">
+                            FLAG{SQL_INJECTION_MASTER_2024}
+                        </div>
+                        <button onclick="nextLevel(2)" class="btn-danger">CONTINUAR AL NIVEL 2 →</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Challenge 2: XSS Reflejado -->
+            <div class="card hidden-panel" id="challenge2">
+                <div class="card-header">
+                    <div class="card-title">⚡ NIVEL 2: XSS Reflejado</div>
+                    <span class="badge badge-locked" id="badge2">BLOQUEADO</span>
+                </div>
+                <div class="card-body">
+                    <p style="margin-bottom: 1rem; color: var(--secondary);">
+                        El sistema refleja tu entrada sin sanitizar. Ejecuta código JavaScript 
+                        para obtener la flag.
+                    </p>
+
+                    <div class="form-group">
+                        <label>Buscar en el sistema</label>
+                        <input type="text" id="xssInput" placeholder="Ingresa término de búsqueda..." onkeyup="checkXSS(this.value)">
+                    </div>
+
+                    <div id="xssOutput" style="margin: 1rem 0; padding: 1rem; background: var(--darker); border: 1px solid var(--secondary); min-height: 50px;">
+                        <span style="color: var(--secondary);">Resultados aparecerán aquí...</span>
+                    </div>
+
+                    <button onclick="toggleHint(2)" class="btn-warning">💡 PISTA</button>
+
+                    <div class="hint-box" id="hint2">
+                        <strong>PISTA:</strong> Intenta inyectar etiquetas &lt;script&gt;. 
+                        Ejemplo: <code>&lt;script&gt;alert('XSS')&lt;/script&gt;</code>
+                    </div>
+
+                    <div id="xssSuccess" class="hidden-panel" style="margin-top: 1rem;">
+                        <div class="alert alert-success">
+                            <strong>✓ XSS EJECUTADO</strong><br>
+                            Script detectado y ejecutado correctamente.
+                        </div>
+                        <div class="flag">
+                            FLAG{XSS_REFLECTED_HACKER}
+                        </div>
+                        <button onclick="nextLevel(3)" class="btn-danger">CONTINUAR AL NIVEL 3 →</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Challenge 3: XSS Almacenado -->
+            <div class="card hidden-panel" id="challenge3">
+                <div class="card-header">
+                    <div class="card-title">💾 NIVEL 3: XSS Almacenado</div>
+                    <span class="badge badge-locked" id="badge3">BLOQUEADO</span>
+                </div>
+                <div class="card-body">
+                    <p style="margin-bottom: 1rem; color: var(--secondary);">
+                        Los comentarios se guardan sin filtrar. Inyecta un payload que se 
+                        ejecute cuando otro usuario (bot admin) visite la página.
+                    </p>
+
+                    <form onsubmit="return addComment(event)">
+                        <div class="form-group">
+                            <label>Nombre</label>
+                            <input type="text" id="commentName" placeholder="Tu nombre" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Comentario</label>
+                            <textarea id="commentText" rows="3" placeholder="Escribe tu comentario..." required></textarea>
+                        </div>
+                        <button type="submit">PUBLICAR COMENTARIO</button>
+                        <button type="button" class="btn-warning" onclick="toggleHint(3)">💡 PISTA</button>
+                        <button type="button" onclick="simulateAdminVisit()" class="btn-danger" style="margin-left: 0.5rem;">🤖 SIMULAR VISITA ADMIN</button>
+                    </form>
+
+                    <div class="hint-box" id="hint3">
+                        <strong>PISTA:</strong> Usa <code>&lt;img src=x onerror="alert('XSS')"&gt;</code> 
+                        o <code>&lt;script&gt;document.location='/?flag='&lt;/script&gt;</code>
+                    </div>
+
+                    <div class="comments-section" id="commentsSection">
+                        <div class="comment">
+                            <div class="comment-author">Admin</div>
+                            <div class="comment-text">Bienvenidos al sistema de comentarios. Estoy revisando periódicamente.</div>
+                        </div>
+                    </div>
+
+                    <div id="storedXssSuccess" class="hidden-panel" style="margin-top: 1rem;">
+                        <div class="alert alert-success">
+                            <strong>✓ XSS ALMACENADO DETECTADO</strong><br>
+                            El payload se ejecutó durante la visita del administrador.
+                        </div>
+                        <div class="flag">
+                            FLAG{STORED_XSS_PERSISTENT}
+                        </div>
+                        <button onclick="nextLevel(4)" class="btn-danger">CONTINUAR AL NIVEL 4 →</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Challenge 4: Sensitive Data Exposure -->
+            <div class="card hidden-panel" id="challenge4">
+                <div class="card-header">
+                    <div class="card-title">🔑 NIVEL 4: Exposición de Datos Sensibles</div>
+                    <span class="badge badge-locked" id="badge4">BLOQUEADO</span>
+                </div>
+                <div class="card-body">
+                    <p style="margin-bottom: 1rem; color: var(--secondary);">
+                        Los desarrolladores dejaron información sensible en el código frontend.
+                        Inspecciona el código fuente para encontrar credenciales ocultas.
+                    </p>
+
+                    <button onclick="toggleSource()" class="btn-warning">👁️ VER CÓDIGO FUENTE</button>
+
+                    <div class="source-viewer" id="sourceViewer">
+                        <div class="source-line">
+                            <span class="line-number">1</span>
+                            <span class="line-content"><span class="code-comment">// Configuración del sistema - NO BORRAR</span></span>
+                        </div>
+                        <div class="source-line">
+                            <span class="line-number">2</span>
+                            <span class="line-content"><span class="code-keyword">const</span> config = {</span>
+                        </div>
+                        <div class="source-line">
+                            <span class="line-number">3</span>
+                            <span class="line-content">  apiKey: <span class="code-string">"sk_live_51H..."</span>,</span>
+                        </div>
+                        <div class="source-line">
+                            <span class="line-number">4</span>
+                            <span class="line-content">  dbHost: <span class="code-string">"localhost"</span>,</span>
+                        </div>
+                        <div class="source-line">
+                            <span class="line-number">5</span>
+                            <span class="line-content">  <span class="code-comment">// TODO: Remover antes de producción</span></span>
+                        </div>
+                        <div class="source-line">
+                            <span class="line-number">6</span>
+                            <span class="line-content">  adminUser: <span class="code-string">"superadmin"</span>,</span>
+                        </div>
+                        <div class="source-line">
+                            <span class="line-number">7</span>
+                            <span class="line-content">  adminPass: <span class="code-string">"S3cr3tP@ss2024!"</span>, <span class="code-comment">// FLAG{CREDENTIALS_EXPOSED}</span></span>
+                        </div>
+                        <div class="source-line">
+                            <span class="line-number">8</span>
+                            <span class="line-content">  debug: <span class="code-keyword">true</span></span>
+                        </div>
+                        <div class="source-line">
+                            <span class="line-number">9</span>
+                            <span class="line-content">};</span>
+                        </div>
+                    </div>
+
+                    <form onsubmit="return checkAdminCreds(event)" style="margin-top: 1rem;">
+                        <div class="form-group">
+                            <label>Usuario Admin</label>
+                            <input type="text" id="adminUserInput" placeholder="¿Encontraste el usuario?">
+                        </div>
+                        <div class="form-group">
+                            <label>Contraseña</label>
+                            <input type="password" id="adminPassInput" placeholder="¿Y la contraseña?">
+                        </div>
+                        <button type="submit">VERIFICAR CREDENCIALES</button>
+                        <button type="button" class="btn-warning" onclick="toggleHint(4)">💡 PISTA</button>
+                    </form>
+
+                    <div class="hint-box" id="hint4">
+                        <strong>PISTA:</strong> Revisa el código fuente de la página (Ctrl+U). 
+                        Busca comentarios o variables con "admin", "password", "secret", etc.
+                    </div>
+
+                    <div id="credsSuccess" class="hidden-panel" style="margin-top: 1rem;">
+                        <div class="alert alert-success">
+                            <strong>✓ CREDENCIALES VÁLIDAS</strong><br>
+                            Has encontrado datos expuestos en el frontend.
+                        </div>
+                        <div class="flag">
+                            FLAG{CREDENTIALS_EXPOSED}
+                        </div>
+                        <button onclick="nextLevel(5)" class="btn-danger">CONTINUAR AL NIVEL 5 →</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Challenge 5: Hidden Admin Panel -->
+            <div class="card hidden-panel" id="challenge5">
+                <div class="card-header">
+                    <div class="card-title">📂 NIVEL 5: Panel Admin Oculto</div>
+                    <span class="badge badge-locked" id="badge5">BLOQUEADO</span>
+                </div>
+                <div class="card-body">
+                    <p style="margin-bottom: 1rem; color: var(--secondary);">
+                        Existe un panel de administración oculto en <code>/admin</code>.
+                        Encuentra la forma de acceder y obtener la flag maestra.
+                    </p>
+
+                    <div id="adminPanelSection">
+                        <div class="alert alert-warning">
+                            El panel está oculto. Usa la terminal o encuentra el enlace secreto.
+                        </div>
+                        <button onclick="toggleHint(5)" class="btn-warning">💡 PISTA</button>
+                    </div>
+
+                    <div class="hint-box" id="hint5">
+                        <strong>PISTA:</strong> Intenta acceder mediante la terminal con el comando 
+                        <code>admin</code> o busca en el código fuente referencias a "admin".
+                    </div>
+
+                    <!-- Simulated Admin Panel -->
+                    <div id="adminPanel" class="hidden-panel admin-panel" style="margin-top: 1rem;">
+                        <div class="card-header" style="background: rgba(255, 0, 64, 0.2);">
+                            <div class="card-title" style="color: var(--alert);">🔒 PANEL DE ADMINISTRACIÓN</div>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-error">
+                                <strong>ACCESO RESTRINGIDO - SOLO PERSONAL AUTORIZADO</strong>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1rem 0;">
+                                <div style="padding: 1rem; background: var(--darker); border: 1px solid var(--alert); text-align: center;">
+                                    <div style="font-size: 2rem;">👥</div>
+                                    <div style="font-size: 0.8rem; color: var(--secondary);">Usuarios</div>
+                                    <div style="font-size: 1.5rem; color: var(--alert);">1,337</div>
+                                </div>
+                                <div style="padding: 1rem; background: var(--darker); border: 1px solid var(--alert); text-align: center;">
+                                    <div style="font-size: 2rem;">🚨</div>
+                                    <div style="font-size: 0.8rem; color: var(--secondary);">Alertas</div>
+                                    <div style="font-size: 1.5rem; color: var(--alert);">42</div>
+                                </div>
+                                <div style="padding: 1rem; background: var(--darker); border: 1px solid var(--alert); text-align: center;">
+                                    <div style="font-size: 2rem;">🔐</div>
+                                    <div style="font-size: 0.8rem; color: var(--secondary);">Secrets</div>
+                                    <div style="font-size: 1.5rem; color: var(--alert);">TOP</div>
+                                </div>
+                            </div>
+                            <div class="flag" style="border-color: var(--alert); color: var(--alert);">
+                                FLAG{ADMIN_PANEL_PWNED}
+                            </div>
+                            <button onclick="nextLevel(6)" class="btn-danger" style="width: 100%; margin-top: 1rem;">
+                                OBTENER FLAG FINAL →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Challenge 6: Final Flag -->
+            <div class="card hidden-panel" id="challenge6">
+                <div class="card-header">
+                    <div class="card-title">🏆 NIVEL 6: Maestro del Hacking</div>
+                    <span class="badge badge-completed" id="badge6">COMPLETADO</span>
+                </div>
+                <div class="card-body" style="text-align: center;">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">🎉</div>
+                    <h2 style="color: var(--primary); margin-bottom: 1rem;">¡FELICIDADES!</h2>
+                    <p style="color: var(--secondary); margin-bottom: 2rem;">
+                        Has completado todos los desafíos del Web Security Lab.<br>
+                        Demostraste habilidades en SQL Injection, XSS y reconocimiento.
+                    </p>
+                    <div class="flag" style="font-size: 1.5rem; border-width: 3px;">
+                        FLAG{MASTER_HACKER_COMPLETE}
+                    </div>
+                    <div style="margin-top: 2rem; padding: 1rem; background: rgba(0, 255, 65, 0.1); border: 1px solid var(--primary);">
+                        <strong>LOGROS DESBLOQUEADOS:</strong><br>
+                        <span id="achievementsList"></span>
+                    </div>
+                    <button onclick="resetLab()" class="btn-danger" style="margin-top: 2rem;">
+                        🔄 REINICIAR LABORATORIO
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Column: Terminal -->
+        <div class="terminal-column">
+            <div class="terminal">
+                <div class="terminal-header">
+                    <span>root@nfwl-lab:~# terminal</span>
+                    <div class="terminal-buttons">
+                        <span class="terminal-btn red"></span>
+                        <span class="terminal-btn yellow"></span>
+                        <span class="terminal-btn green"></span>
+                    </div>
+                </div>
+                <div class="terminal-body" id="terminalBody">
+                    <div class="terminal-output success">
+                        Web Security Lab v1.0 - NFWL.exe<br>
+                        Sistema iniciado...<br>
+                        Escribe 'help' para ver comandos disponibles.<br>
+                    </div>
+                </div>
+                <div style="padding: 0 1rem 1rem;">
+                    <div class="terminal-input-line">
+                        <span class="terminal-prompt">root@nfwl:~$</span>
+                        <input type="text" class="terminal-input" id="terminalInput" autofocus autocomplete="off">
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Logs -->
+            <div class="card" style="margin-top: 1rem;">
+                <div class="card-header">
+                    <div class="card-title">📜 Logs del Sistema</div>
+                </div>
+                <div class="card-body" style="max-height: 200px; overflow-y: auto;" id="systemLogs">
+                    <div class="log-entry">[SYSTEM] Laboratorio iniciado</div>
+                    <div class="log-entry">[SYSTEM] Esperando interacción...</div>
+                </div>
+            </div>
+
+            <!-- Quick Commands -->
+            <div class="card" style="margin-top: 1rem;">
+                <div class="card-header">
+                    <div class="card-title">⌨️ Comandos Rápidos</div>
+                </div>
+                <div class="card-body">
+                    <button onclick="executeCommand('help')" style="width: 100%; margin-bottom: 0.5rem;">help</button>
+                    <button onclick="executeCommand('ls')" style="width: 100%; margin-bottom: 0.5rem;">ls</button>
+                    <button onclick="executeCommand('whoami')" style="width: 100%; margin-bottom: 0.5rem;">whoami</button>
+                    <button onclick="executeCommand('hack')" style="width: 100%; margin-bottom: 0.5rem;">hack</button>
+                    <button onclick="executeCommand('admin')" style="width: 100%;">admin</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for messages -->
+    <div class="modal-overlay" id="modal">
+        <div class="modal">
+            <div class="modal-header">
+                <span id="modalTitle">Mensaje</span>
+                <button class="close-btn" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                Contenido del modal
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /*
+         * Web Security Lab - NFWL.exe
+         * ENTORNO EDUCATIVO - SOLO PARA FINES DE APRENDIZAJE
+         * 
+         * Este código simula vulnerabilidades comunes de seguridad web
+         * para fines educativos. No contiene código malicioso real.
+         * No se conecta a servidores externos ni expone datos reales.
+         */
+
+        // ==================== ESTADO DEL JUEGO ====================
+        const gameState = {
+            level: 1,
+            lives: 3,
+            flags: [],
+            completed: [],
+            achievements: [],
+            comments: [],
+            konami: false
+        };
+
+        // ==================== INICIALIZACIÓN ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            updateUI();
+            setupTerminal();
+            setupKonami();
+            addLog('Sistema listo. Nivel 1 desbloqueado.');
+        });
+
+        // ==================== SISTEMA DE NIVELES ====================
+        function nextLevel(level) {
+            if (gameState.completed.includes(level - 1)) return;
+            
+            gameState.completed.push(level - 1);
+            gameState.level = level;
+            
+            // Capturar flag
+            const flags = [
+                'FLAG{SQL_INJECTION_MASTER_2024}',
+                'FLAG{XSS_REFLECTED_HACKER}',
+                'FLAG{STORED_XSS_PERSISTENT}',
+                'FLAG{CREDENTIALS_EXPOSED}',
+                'FLAG{ADMIN_PANEL_PWNED}',
+                'FLAG{MASTER_HACKER_COMPLETE}'
+            ];
+            
+            if (!gameState.flags.includes(flags[level - 2])) {
+                gameState.flags.push(flags[level - 2]);
+                showAchievement(`Nivel ${level - 1} Completado`, `Flag capturada: ${flags[level - 2]}`);
+            }
+
+            // Desbloquear siguiente nivel
+            const nextChallenge = document.getElementById(`challenge${level}`);
+            if (nextChallenge) {
+                nextChallenge.classList.remove('hidden-panel');
+                nextChallenge.scrollIntoView({ behavior: 'smooth' });
+                addLog(`Nivel ${level} desbloqueado`);
+            }
+
+            updateUI();
+        }
+
+        function updateUI() {
+            // Actualizar nivel
+            document.getElementById('currentLevel').textContent = gameState.level;
+            
+            // Actualizar vidas
+            const hearts = '❤️'.repeat(gameState.lives) + '🖤'.repeat(3 - gameState.lives);
+            document.getElementById('livesDisplay').innerHTML = hearts;
+            
+            // Actualizar progreso
+            const progress = (gameState.flags.length / 6) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+            document.getElementById('progressText').textContent = `${Math.round(progress)}%`;
+            
+            // Actualizar contador de flags
+            document.getElementById('flagsCount').textContent = `${gameState.flags.length}/6`;
+            
+            // Actualizar badges
+            gameState.completed.forEach(lvl => {
+                const badge = document.getElementById(`badge${lvl}`);
+                if (badge) {
+                    badge.textContent = 'COMPLETADO';
+                    badge.className = 'badge badge-completed';
+                }
+            });
+            
+            // Actualizar badge actual
+            const currentBadge = document.getElementById(`badge${gameState.level}`);
+            if (currentBadge && !gameState.completed.includes(gameState.level)) {
+                currentBadge.textContent = 'ACTIVO';
+                currentBadge.className = 'badge badge-unlocked';
+            }
+        }
+
+        // ==================== CHALLENGE 1: SQL INJECTION ====================
+        function checkLogin(event) {
+            event.preventDefault();
+            
+            const user = document.getElementById('loginUser').value;
+            const pass = document.getElementById('loginPass').value;
+            
+            // Simulación de vulnerabilidad SQL Injection
+            // En un sistema real, esto sería: SELECT * FROM users WHERE username='$user' AND password='$pass'
+            const sqlPattern = /'.*OR.*['"].*=.*['"].*--?/i;
+            const sqlPattern2 = /'.*OR.*1\s*=\s*1/i;
+            const sqlPattern3 = /admin'--/i;
+            
+            if (sqlPattern.test(user) || sqlPattern2.test(user) || sqlPattern3.test(user) || 
+                (user.includes("'") && user.toLowerCase().includes('or'))) {
+                
+                addLog('SQL Injection detectado en login', 'warning');
+                document.getElementById('loginSuccess').classList.add('active');
+                terminalOutput('Bypass de autenticación exitoso. Bienvenido, administrador.', 'success');
+                return false;
+            }
+            
+            // Verificar credenciales hardcodeadas (otra vulnerabilidad)
+            if (user === 'admin' && pass === 'admin123') {
+                showModal('Acceso Denegado', 'Contraseña incorrecta. Pista: Prueba con SQL Injection.');
+                loseLife();
+                return false;
+            }
+            
+            showModal('Error', 'Credenciales inválidas. Intenta usar SQL Injection para bypass.');
+            loseLife();
+            return false;
+        }
+
+        // ==================== CHALLENGE 2: XSS REFLEJADO ====================
+        function checkXSS(value) {
+            const output = document.getElementById('xssOutput');
+            
+            // Simulación de vulnerabilidad XSS reflejado
+            // El sistema inserta el input directamente en el DOM sin sanitizar
+            output.innerHTML = `Buscando: ${value}`;
+            
+            // Detectar payload XSS
+            const xssPattern = /<script\b[^>]*>([\s\S]*?)<\/script>/i;
+            const xssPattern2 = /javascript:/i;
+            const xssPattern3 = /on\w+\s*=/i;
+            const xssPattern4 = /<img[^>]+onerror\s*=/i;
+            
+            if (xssPattern.test(value) || xssPattern2.test(value) || 
+                xssPattern3.test(value) || xssPattern4.test(value)) {
+                
+                setTimeout(() => {
+                    document.getElementById('xssSuccess').classList.add('active');
+                    addLog('XSS Reflejado ejecutado', 'warning');
+                    terminalOutput('¡XSS detectado! Script ejecutado en el contexto de la página.', 'success');
+                }, 500);
+            }
+        }
+
+        // ==================== CHALLENGE 3: XSS ALMACENADO ====================
+        function addComment(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('commentName').value;
+            const text = document.getElementById('commentText').value;
+            
+            // Agregar comentario sin sanitización (vulnerable)
+            const commentDiv = document.createElement('div');
+            commentDiv.className = 'comment';
+            commentDiv.innerHTML = `
+                <div class="comment-author">${escapeHtml(name)}</div>
+                <div class="comment-text">${text}</div>
+            `;
+            
+            document.getElementById('commentsSection').appendChild(commentDiv);
+            
+            // Limpiar formulario
+            document.getElementById('commentName').value = '';
+            document.getElementById('commentText').value = '';
+            
+            addLog('Nuevo comentario agregado');
+            terminalOutput('Comentario publicado. Esperando revisión del admin...', 'info');
+            
+            return false;
+        }
+
+        function simulateAdminVisit() {
+            const comments = document.querySelectorAll('.comment-text');
+            let xssFound = false;
+            
+            comments.forEach(comment => {
+                const text = comment.innerHTML;
+                if (/<script|javascript:|on\w+\s*=|<img[^>]+onerror/i.test(text)) {
+                    xssFound = true;
+                }
+            });
+            
+            if (xssFound) {
+                document.getElementById('storedXssSuccess').classList.add('active');
+                addLog('Admin visitó la página - XSS ejecutado', 'error');
+                terminalOutput('ALERTA: XSS almacenado detectado durante visita del administrador', 'error');
+            } else {
+                showModal('Simulación', 'El administrador visitó la página pero no se detectó XSS. Intenta inyectar código JavaScript en un comentario.');
+            }
+        }
+
+        // ==================== CHALLENGE 4: SENSITIVE DATA ====================
+        function toggleSource() {
+            const viewer = document.getElementById('sourceViewer');
+            viewer.classList.toggle('visible');
+            addLog('Código fuente inspeccionado');
+        }
+
+        function checkAdminCreds(event) {
+            event.preventDefault();
+            
+            const user = document.getElementById('adminUserInput').value;
+            const pass = document.getElementById('adminPassInput').value;
+            
+            // Credenciales expuestas en el código fuente
+            if (user === 'superadmin' && pass === 'S3cr3tP@ss2024!') {
+                document.getElementById('credsSuccess').classList.add('active');
+                addLog('Credenciales expuestas verificadas', 'warning');
+                terminalOutput('Acceso concedido con credenciales encontradas en frontend', 'success');
+            } else {
+                showModal('Error', 'Credenciales incorrectas. Revisa el código fuente cuidadosamente.');
+                loseLife();
+            }
+            
+            return false;
+        }
+
+        // ==================== TERMINAL ====================
+        function setupTerminal() {
+            const input = document.getElementById('terminalInput');
+            
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const command = input.value.trim();
+                    if (command) {
+                        executeCommand(command);
+                    }
+                    input.value = '';
+                }
+            });
+            
+            // Mantener foco en el terminal
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('.terminal')) {
+                    input.focus();
+                }
+            });
+        }
+
+        function executeCommand(command) {
+            const args = command.split(' ');
+            const cmd = args[0].toLowerCase();
+            
+            // Mostrar comando ejecutado
+            const terminalBody = document.getElementById('terminalBody');
+            const cmdLine = document.createElement('div');
+            cmdLine.className = 'terminal-output';
+            cmdLine.innerHTML = `<span style="color: var(--secondary);">root@nfwl:~$</span> ${command}`;
+            terminalBody.appendChild(cmdLine);
+            
+            addLog(`Comando ejecutado: ${command}`);
+            
+            // Procesar comando
+            switch(cmd) {
+                case 'help':
+                    terminalOutput(`
+Comandos disponibles:
+  help          - Muestra esta ayuda
+  ls            - Lista archivos del sistema
+  whoami        - Muestra usuario actual
+  cat [file]    - Muestra contenido de archivo
+  hack          - Inicia secuencia de hacking
+  admin         - Accede al panel de administración
+  clear         - Limpia la terminal
+  nmap          - Escanea puertos (simulado)
+  sqlmap        - Herramienta de SQL Injection
+  exit          - Cierra sesión
+                    `, 'info');
+                    break;
+                    
+                case 'ls':
+                    terminalOutput(`
+drwxr-xr-x  root  root  4096  config/
+drwxr-xr-x  root  root  4096  logs/
+-rw-r--r--  root  root  1337  flag.txt
+-rw-r--r--  root  root  2048  users.db
+-rwxr-xr-x  root  root  512   secret_script.sh
+                    `, 'success');
+                    break;
+                    
+                case 'whoami':
+                    terminalOutput('root', 'success');
+                    break;
+                    
+                case 'cat':
+                    if (args[1] === 'flag.txt') {
+                        terminalOutput('FLAG{TERMINAL_MASTER}', 'success');
+                        unlockAchievement('Terminal Master');
+                    } else if (args[1] === 'users.db') {
+                        terminalOutput('Error: Base de datos encriptada. Intenta SQL Injection.', 'error');
+                    } else {
+                        terminalOutput('Archivo no encontrado', 'error');
+                    }
+                    break;
+                    
+                case 'hack':
+                    terminalOutput(`
+[+] Iniciando secuencia de hacking...
+[+] Escaneando objetivo...
+[+] Vulnerabilidad encontrada: SQL Injection
+[+] Vulnerabilidad encontrada: XSS
+[+] Recomendación: Usa los formularios de la izquierda para explotar
+                    `, 'success');
+                    break;
+                    
+                case 'admin':
+                    if (gameState.level >= 5) {
+                        document.getElementById('adminPanel').classList.add('active');
+                        document.getElementById('adminPanelSection').style.display = 'none';
+                        terminalOutput('Accediendo al panel de administración...', 'success');
+                        addLog('Acceso a panel admin mediante terminal', 'warning');
+                        document.getElementById('adminPanel').scrollIntoView({ behavior: 'smooth' });
+                    } else {
+                        terminalOutput('Error: Nivel 5 no desbloqueado. Completa los desafíos anteriores.', 'error');
+                    }
+                    break;
+                    
+                case 'clear':
+                    terminalBody.innerHTML = '';
+                    break;
+                    
+                case 'nmap':
+                    terminalOutput(`
+Starting Nmap scan...
+PORT     STATE SERVICE
+22/tcp   open  ssh
+80/tcp   open  http
+3306/tcp open  mysql
+8080/tcp open  http-proxy
+
+Vulnerabilities detected on port 80:
+- SQL Injection possible
+- XSS vulnerabilities found
+                    `, 'info');
+                    break;
+                    
+                case 'sqlmap':
+                    terminalOutput(`
+sqlmap detected this as a test environment.
+No real database connections available.
+Try the login form manually with SQL injection payloads.
+                    `, 'warning');
+                    break;
+                    
+                case 'exit':
+                    terminalOutput('Cerrando sesión...', 'info');
+                    setTimeout(() => location.reload(), 1000);
+                    break;
+                    
+                default:
+                    if (cmd.startsWith('./')) {
+                        terminalOutput(`Ejecutando ${cmd}...`, 'info');
+                        setTimeout(() => {
+                            terminalOutput('Script ejecutado. No se encontraron vulnerabilidades adicionales.', 'success');
+                        }, 1000);
+                    } else {
+                        terminalOutput(`Comando no encontrado: ${cmd}. Escribe 'help' para ver comandos disponibles.`, 'error');
+                    }
+            }
+            
+            // Scroll al final
+            terminalBody.scrollTop = terminalBody.scrollHeight;
+        }
+
+        function terminalOutput(text, type = 'info') {
+            const terminalBody = document.getElementById('terminalBody');
+            const output = document.createElement('div');
+            output.className = `terminal-output ${type}`;
+            output.textContent = text;
+            terminalBody.appendChild(output);
+            terminalBody.scrollTop = terminalBody.scrollHeight;
+        }
+
+        // ==================== UTILIDADES ====================
+        function toggleHint(num) {
+            const hint = document.getElementById(`hint${num}`);
+            hint.classList.toggle('visible');
+            addLog(`Pista ${num} consultada`);
+        }
+
+        function showModal(title, body) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalBody').innerHTML = body;
+            document.getElementById('modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+        }
+
+        function loseLife() {
+            gameState.lives--;
+            updateUI();
+            
+            if (gameState.lives <= 0) {
+                showModal('Game Over', 'Has perdido todas tus vidas. El laboratorio se reiniciará.');
+                setTimeout(resetLab, 2000);
+            }
+        }
+
+        function resetLab() {
+            location.reload();
+        }
+
+        function addLog(message, type = 'info') {
+            const logs = document.getElementById('systemLogs');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry new';
+            
+            const timestamp = new Date().toLocaleTimeString();
+            const typePrefix = type === 'error' ? '[ERROR]' : type === 'warning' ? '[WARN]' : '[INFO]';
+            
+            entry.textContent = `[${timestamp}] ${typePrefix} ${message}`;
+            logs.insertBefore(entry, logs.firstChild);
+            
+            setTimeout(() => entry.classList.remove('new'), 1000);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ==================== LOGROS ====================
+        function showAchievement(title, desc) {
+            const achievement = document.getElementById('achievement');
+            document.getElementById('achievementText').textContent = desc;
+            achievement.querySelector('.achievement-title').textContent = `🏆 ${title}`;
+            
+            achievement.classList.add('show');
+            setTimeout(() => achievement.classList.remove('show'), 5000);
+        }
+
+        function unlockAchievement(name) {
+            if (!gameState.achievements.includes(name)) {
+                gameState.achievements.push(name);
+                showAchievement(name, '¡Logro especial desbloqueado!');
+            }
+        }
+
+        // ==================== EASTER EGG: KONAMI CODE ====================
+        function setupKonami() {
+            const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 
+                               'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 
+                               'b', 'a'];
+            let konamiIndex = 0;
+            
+            document.addEventListener('keydown', (e) => {
+                if (e.key === konamiCode[konamiIndex]) {
+                    konamiIndex++;
+                    if (konamiIndex === konamiCode.length) {
+                        activateKonami();
+                        konamiIndex = 0;
+                    }
+                } else {
+                    konamiIndex = 0;
+                }
+            });
+        }
+
+        function activateKonami() {
+            gameState.konami = true;
+            document.getElementById('konami').classList.add('active');
+            gameState.lives = 99;
+            updateUI();
+            terminalOutput('🎮 KONAMI CODE ACTIVADO - MODO DIOS HABILITADO', 'success');
+            unlockAchievement('Konami Master');
+            
+            setTimeout(() => {
+                document.getElementById('konami').classList.remove('active');
+            }, 3000);
+        }
+
+        // Cerrar modal al hacer clic fuera
+        document.getElementById('modal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('modal')) {
+                closeModal();
+            }
+        });
+
+        // ==================== COMENTARIOS INICIALES ====================
+        // Agregar algunos comentarios de ejemplo
+        window.addEventListener('load', () => {
+            const initialComments = [
+                { name: 'Usuario123', text: 'Gran sistema!' },
+                { name: 'HackerBoy', text: 'Alguien ha probado <b>negritas</b> aquí?' },
+                { name: 'Admin', text: 'Revisando comentarios regularmente...' }
+            ];
+            
+            const container = document.getElementById('commentsSection');
+            initialComments.forEach(c => {
+                const div = document.createElement('div');
+                div.className = 'comment';
+                div.innerHTML = `
+                    <div class="comment-author">${escapeHtml(c.name)}</div>
+                    <div class="comment-text">${c.text}</div>
+                `;
+                container.appendChild(div);
+            });
+        });
+    </script>
+</body>
+</html>
