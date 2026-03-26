@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web Security Lab - ciberseguridad.exe</title>
+    <title>Web Security Lab - ciberseguridad.exe | Ethical Hacking Learning Platform</title>
     <style>
         /* 
-         * Web Security Lab - NFWL.exe
+         * Web Security Lab - NFWL.exe v2.0
          * ENTORNO EDUCATIVO - SOLO PARA FINES DE APRENDIZAJE
          * Este es un laboratorio controlado sin conexión a servidores reales
+         * Todas las vulnerabilidades son simuladas para propósitos educativos
          */
         
         :root {
@@ -39,26 +40,49 @@
         }
 
         @keyframes glitch {
-            0% { transform: translate(0); }
-            20% { transform: translate(-2px, 2px); }
-            40% { transform: translate(-2px, -2px); }
-            60% { transform: translate(2px, 2px); }
-            80% { transform: translate(2px, -2px); }
-            100% { transform: translate(0); }
+            0% { transform: translate(0); text-shadow: 0 0 0 var(--primary); }
+            20% { transform: translate(-2px, 2px); text-shadow: -2px 0 var(--alert); }
+            40% { transform: translate(-2px, -2px); text-shadow: 2px 0 var(--warning); }
+            60% { transform: translate(2px, 2px); text-shadow: 0 -2px var(--primary); }
+            80% { transform: translate(2px, -2px); text-shadow: 0 2px var(--secondary); }
+            100% { transform: translate(0); text-shadow: 0 0 0 var(--primary); }
         }
 
         @keyframes pulse {
-            0%, 100% { box-shadow: 0 0 5px var(--primary); }
-            50% { box-shadow: 0 0 20px var(--primary), 0 0 40px var(--secondary); }
+            0%, 100% { box-shadow: 0 0 5px var(--primary); opacity: 1; }
+            50% { box-shadow: 0 0 20px var(--primary), 0 0 40px var(--secondary); opacity: 0.9; }
+        }
+
+        @keyframes matrix {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 0% 100%; }
         }
 
         body {
-            font-family: 'Courier New', monospace;
+            font-family: 'Courier New', 'Fira Code', monospace;
             background: var(--darker);
             color: var(--primary);
             min-height: 100vh;
             overflow-x: hidden;
             position: relative;
+        }
+
+        /* Matrix background effect */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(0deg, 
+                rgba(0, 255, 65, 0.03) 0px, 
+                rgba(0, 255, 65, 0.03) 2px,
+                transparent 2px,
+                transparent 6px);
+            pointer-events: none;
+            z-index: 0;
+            animation: matrix 20s linear infinite;
         }
 
         /* Efecto de scanline */
@@ -85,11 +109,15 @@
             left: 0;
             width: 100%;
             height: 2px;
-            background: rgba(0, 255, 65, 0.3);
-            box-shadow: 0 0 10px var(--primary);
-            animation: scanline 4s linear infinite;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(0, 255, 65, 0.8), 
+                rgba(0, 255, 65, 0.3),
+                transparent);
+            animation: scanline 6s linear infinite;
             pointer-events: none;
             z-index: 999;
+            filter: blur(1px);
         }
 
         /* Header */
@@ -101,6 +129,7 @@
             top: 0;
             z-index: 100;
             box-shadow: 0 2px 20px rgba(0, 255, 65, 0.2);
+            backdrop-filter: blur(5px);
         }
 
         .header-content {
@@ -120,6 +149,7 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            animation: pulse 2s infinite;
         }
 
         .logo::before {
@@ -138,6 +168,9 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            background: rgba(0, 255, 65, 0.05);
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
         }
 
         .status-label {
@@ -151,6 +184,7 @@
 
         .hearts {
             color: var(--alert);
+            letter-spacing: 2px;
         }
 
         /* Progress Bar */
@@ -161,6 +195,7 @@
             border: 1px solid var(--primary);
             position: relative;
             overflow: hidden;
+            border-radius: 2px;
         }
 
         .progress-bar {
@@ -178,6 +213,7 @@
             font-size: 0.7rem;
             color: var(--dark);
             font-weight: bold;
+            text-shadow: none;
         }
 
         /* Main Container */
@@ -188,6 +224,8 @@
             display: grid;
             grid-template-columns: 1fr 400px;
             gap: 2rem;
+            position: relative;
+            z-index: 1;
         }
 
         @media (max-width: 1024px) {
@@ -198,11 +236,18 @@
 
         /* Cards */
         .card {
-            background: var(--dark);
+            background: rgba(13, 2, 8, 0.95);
             border: 1px solid var(--primary);
             margin-bottom: 1.5rem;
             position: relative;
             overflow: hidden;
+            backdrop-filter: blur(2px);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 255, 65, 0.2);
         }
 
         .card::before {
@@ -245,16 +290,19 @@
             border: 1px solid;
             font-size: 0.75rem;
             text-transform: uppercase;
+            border-radius: 2px;
         }
 
         .badge-locked {
             border-color: var(--alert);
             color: var(--alert);
+            background: rgba(255, 0, 64, 0.1);
         }
 
         .badge-unlocked {
             border-color: var(--primary);
             color: var(--primary);
+            background: rgba(0, 255, 65, 0.1);
         }
 
         .badge-completed {
@@ -304,12 +352,18 @@
             font-size: 0.85rem;
             position: relative;
             overflow: hidden;
+            border-radius: 2px;
         }
 
         button:hover:not(:disabled) {
             background: var(--primary);
             color: var(--dark);
             box-shadow: 0 0 20px var(--primary);
+            transform: scale(1.02);
+        }
+
+        button:active:not(:disabled) {
+            transform: scale(0.98);
         }
 
         button:disabled {
@@ -325,6 +379,7 @@
         .btn-danger:hover:not(:disabled) {
             background: var(--alert);
             color: white;
+            box-shadow: 0 0 20px var(--alert);
         }
 
         .btn-warning {
@@ -335,6 +390,7 @@
         .btn-warning:hover:not(:disabled) {
             background: var(--warning);
             color: var(--dark);
+            box-shadow: 0 0 20px var(--warning);
         }
 
         /* Terminal */
@@ -344,6 +400,8 @@
             height: 500px;
             display: flex;
             flex-direction: column;
+            position: sticky;
+            top: 80px;
         }
 
         .terminal-header {
@@ -365,6 +423,8 @@
             height: 12px;
             border-radius: 50%;
             border: none;
+            cursor: pointer;
+            transition: all 0.3s;
         }
 
         .terminal-btn.red { background: var(--alert); }
@@ -377,6 +437,7 @@
             overflow-y: auto;
             font-size: 0.85rem;
             line-height: 1.6;
+            font-family: monospace;
         }
 
         .terminal-input-line {
@@ -384,6 +445,8 @@
             align-items: center;
             gap: 0.5rem;
             margin-top: 0.5rem;
+            border-top: 1px solid rgba(0, 255, 65, 0.2);
+            padding-top: 0.5rem;
         }
 
         .terminal-prompt {
@@ -404,12 +467,13 @@
         .terminal-output {
             margin-bottom: 0.5rem;
             word-wrap: break-word;
+            white-space: pre-wrap;
         }
 
-        .terminal-output.error { color: var(--alert); }
-        .terminal-output.success { color: var(--primary); }
-        .terminal-output.info { color: var(--info); }
-        .terminal-output.warning { color: var(--warning); }
+        .terminal-output.error { color: var(--alert); border-left: 2px solid var(--alert); padding-left: 8px; }
+        .terminal-output.success { color: var(--primary); border-left: 2px solid var(--primary); padding-left: 8px; }
+        .terminal-output.info { color: var(--info); border-left: 2px solid var(--info); padding-left: 8px; }
+        .terminal-output.warning { color: var(--warning); border-left: 2px solid var(--warning); padding-left: 8px; }
 
         .cursor {
             display: inline-block;
@@ -427,6 +491,7 @@
             margin-bottom: 1rem;
             position: relative;
             overflow: hidden;
+            border-radius: 2px;
         }
 
         .alert::before {
@@ -473,6 +538,7 @@
         .admin-panel {
             background: linear-gradient(135deg, rgba(255, 0, 64, 0.1), rgba(255, 170, 0, 0.1));
             border: 2px solid var(--alert);
+            animation: glitch 0.5s;
         }
 
         .flag {
@@ -486,17 +552,22 @@
             font-family: monospace;
             position: relative;
             overflow: hidden;
+            border-radius: 2px;
         }
 
         .flag::before {
-            content: 'FLAG CAPTURED';
+            content: '⚑ FLAG CAPTURED ⚑';
             position: absolute;
             top: 0;
             left: -100%;
             width: 100%;
             height: 100%;
             background: linear-gradient(90deg, transparent, rgba(0, 255, 65, 0.3), transparent);
-            animation: shine 2s infinite;
+            animation: shine 3s infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
         }
 
         @keyframes shine {
@@ -512,6 +583,7 @@
             padding: 1rem;
             margin-top: 1rem;
             background: rgba(0, 0, 0, 0.3);
+            border-radius: 2px;
         }
 
         .comment {
@@ -543,10 +615,11 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 1000;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 2000;
             justify-content: center;
             align-items: center;
+            backdrop-filter: blur(5px);
         }
 
         .modal-overlay.active {
@@ -562,6 +635,7 @@
             overflow-y: auto;
             position: relative;
             animation: glitch 0.3s;
+            border-radius: 4px;
         }
 
         .modal-header {
@@ -598,6 +672,7 @@
             padding: 1rem;
             margin-top: 1rem;
             display: none;
+            border-radius: 2px;
         }
 
         .hint-box.visible {
@@ -614,6 +689,7 @@
             overflow-x: auto;
             margin-top: 1rem;
             display: none;
+            border-radius: 2px;
         }
 
         .source-viewer.visible {
@@ -622,11 +698,12 @@
 
         .source-line {
             display: flex;
+            font-family: monospace;
         }
 
         .line-number {
             color: var(--secondary);
-            min-width: 30px;
+            min-width: 40px;
             user-select: none;
             padding-right: 1rem;
             border-right: 1px solid var(--secondary);
@@ -660,6 +737,11 @@
             .card-body {
                 padding: 1rem;
             }
+            
+            .terminal {
+                position: relative;
+                top: 0;
+            }
         }
 
         /* Scrollbar */
@@ -690,9 +772,10 @@
             border: 2px solid var(--primary);
             padding: 1rem;
             max-width: 350px;
-            z-index: 500;
+            z-index: 1500;
             transition: right 0.5s ease;
             box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+            border-radius: 4px;
         }
 
         .achievement.show {
@@ -724,6 +807,11 @@
             z-index: 2000;
             animation: glitch 0.1s infinite;
             text-shadow: 0 0 20px var(--primary);
+            background: var(--dark);
+            padding: 2rem;
+            border: 2px solid var(--primary);
+            white-space: nowrap;
+            border-radius: 8px;
         }
 
         .konami.active {
@@ -737,11 +825,39 @@
             border-left: 2px solid var(--secondary);
             padding-left: 0.5rem;
             margin-bottom: 0.25rem;
+            font-family: monospace;
         }
 
         .log-entry.new {
             color: var(--primary);
             border-left-color: var(--primary);
+        }
+
+        /* Tooltip */
+        [data-tooltip] {
+            position: relative;
+            cursor: help;
+        }
+
+        [data-tooltip]:before {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 5px 10px;
+            background: var(--dark);
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            font-size: 0.75rem;
+            white-space: nowrap;
+            display: none;
+            z-index: 100;
+            border-radius: 2px;
+        }
+
+        [data-tooltip]:hover:before {
+            display: block;
         }
     </style>
 </head>
@@ -751,24 +867,24 @@
     <!-- Header -->
     <header class="header">
         <div class="header-content">
-            <div class="logo">NFWL.exe // Web Security Lab</div>
+            <div class="logo">NFWL.exe // Web Security Lab v2.0</div>
             <div class="status-bar">
-                <div class="status-item">
+                <div class="status-item" data-tooltip="Nivel actual del laboratorio">
                     <span class="status-label">NIVEL:</span>
                     <span class="status-value" id="currentLevel">1</span>
                 </div>
-                <div class="status-item">
+                <div class="status-item" data-tooltip="Vidas restantes (3 intentos por nivel)">
                     <span class="status-label">VIDAS:</span>
                     <span class="status-value hearts" id="livesDisplay">❤️❤️❤️</span>
                 </div>
-                <div class="status-item">
+                <div class="status-item" data-tooltip="Progreso total del laboratorio">
                     <span class="status-label">PROGRESO:</span>
                     <div class="progress-container">
                         <div class="progress-bar" id="progressBar" style="width: 0%"></div>
                         <span class="progress-text" id="progressText">0%</span>
                     </div>
                 </div>
-                <div class="status-item">
+                <div class="status-item" data-tooltip="Flags capturadas / total">
                     <span class="status-label">FLAGS:</span>
                     <span class="status-value" id="flagsCount">0/6</span>
                 </div>
@@ -783,7 +899,7 @@
     </div>
 
     <!-- Konami Easter Egg -->
-    <div class="konami" id="konami">👾 MODO DIOS ACTIVADO 👾</div>
+    <div class="konami" id="konami">👾 MODO DIOS ACTIVADO 👾<br>♥️ Vidas Infinitas ♥️</div>
 
     <!-- Main Container -->
     <div class="container">
@@ -793,46 +909,53 @@
             <!-- Challenge 1: SQL Injection Login -->
             <div class="card" id="challenge1">
                 <div class="card-header">
-                    <div class="card-title">🔐 NIVEL 1: Login Vulnerable</div>
+                    <div class="card-title">🔐 NIVEL 1: SQL Injection - Bypass de Autenticación</div>
                     <span class="badge badge-locked" id="badge1">BLOQUEADO</span>
                 </div>
                 <div class="card-body">
                     <p style="margin-bottom: 1rem; color: var(--secondary);">
-                        Accede al sistema utilizando técnicas de SQL Injection. 
-                        El sistema es vulnerable a inyección en el campo de usuario.
+                        El formulario de login es vulnerable a <strong>SQL Injection</strong>. 
+                        El sistema no sanitiza las entradas, permitiendo manipular la consulta SQL.
                     </p>
                     
                     <div class="alert alert-warning">
-                        <strong>Pista:</strong> Intenta usar comillas simples y operadores lógicos SQL.
+                        <strong>🎯 OBJETIVO:</strong> Acceder como administrador sin conocer la contraseña.<br>
+                        <strong>💡 TIP:</strong> La consulta SQL sería algo como: 
+                        <code>SELECT * FROM users WHERE username='[input]' AND password='[input]'</code>
                     </div>
 
                     <form id="loginForm" onsubmit="return checkLogin(event)">
                         <div class="form-group">
-                            <label>Usuario</label>
+                            <label>👤 Usuario</label>
                             <input type="text" id="loginUser" placeholder="admin" autocomplete="off">
                         </div>
                         <div class="form-group">
-                            <label>Contraseña</label>
+                            <label>🔒 Contraseña</label>
                             <input type="password" id="loginPass" placeholder="••••••">
                         </div>
-                        <button type="submit">INICIAR SESIÓN</button>
+                        <button type="submit">🚀 INICIAR SESIÓN</button>
                         <button type="button" class="btn-warning" onclick="toggleHint(1)" style="margin-left: 0.5rem;">💡 PISTA</button>
                     </form>
 
                     <div class="hint-box" id="hint1">
-                        <strong>PISTA:</strong> Prueba con <code>' OR '1'='1</code> en el campo de usuario. 
-                        Esto cierra la consulta SQL y añade una condición siempre verdadera.
+                        <strong>💡 PISTA AVANZADA:</strong><br>
+                        Prueba con <code>' OR '1'='1' --</code> en el campo de usuario.<br>
+                        Esto cierra la cadena y añade una condición siempre verdadera.<br>
+                        <strong>Payloads útiles:</strong><br>
+                        • <code>admin' --</code><br>
+                        • <code>' OR 1=1; --</code><br>
+                        • <code>admin' OR '1'='1</code>
                     </div>
 
                     <div id="loginSuccess" class="hidden-panel" style="margin-top: 1rem;">
                         <div class="alert alert-success">
-                            <strong>✓ ACCESO CONCEDIDO</strong><br>
-                            Bienvenido, administrador.
+                            <strong>✓ ACCESO CONCEDIDO ✓</strong><br>
+                            ¡Excelente! Has logrado un bypass de autenticación mediante SQL Injection.
                         </div>
                         <div class="flag">
                             FLAG{SQL_INJECTION_MASTER_2024}
                         </div>
-                        <button onclick="nextLevel(2)" class="btn-danger">CONTINUAR AL NIVEL 2 →</button>
+                        <button onclick="nextLevel(2)" class="btn-danger">➡️ CONTINUAR AL NIVEL 2 ⬅️</button>
                     </div>
                 </div>
             </div>
@@ -840,40 +963,48 @@
             <!-- Challenge 2: XSS Reflejado -->
             <div class="card hidden-panel" id="challenge2">
                 <div class="card-header">
-                    <div class="card-title">⚡ NIVEL 2: XSS Reflejado</div>
+                    <div class="card-title">⚡ NIVEL 2: Cross-Site Scripting (XSS) Reflejado</div>
                     <span class="badge badge-locked" id="badge2">BLOQUEADO</span>
                 </div>
                 <div class="card-body">
                     <p style="margin-bottom: 1rem; color: var(--secondary);">
-                        El sistema refleja tu entrada sin sanitizar. Ejecuta código JavaScript 
-                        para obtener la flag.
+                        El buscador refleja tu entrada directamente en la página sin sanitizar,
+                        permitiendo la ejecución de código JavaScript malicioso.
                     </p>
 
+                    <div class="alert alert-warning">
+                        <strong>🎯 OBJETIVO:</strong> Ejecutar código JavaScript que muestre un alert o capture la flag.
+                    </div>
+
                     <div class="form-group">
-                        <label>Buscar en el sistema</label>
+                        <label>🔍 Buscar en el sistema</label>
                         <input type="text" id="xssInput" placeholder="Ingresa término de búsqueda..." onkeyup="checkXSS(this.value)">
                     </div>
 
                     <div id="xssOutput" style="margin: 1rem 0; padding: 1rem; background: var(--darker); border: 1px solid var(--secondary); min-height: 50px;">
-                        <span style="color: var(--secondary);">Resultados aparecerán aquí...</span>
+                        <span style="color: var(--secondary);">📝 Los resultados aparecerán aquí...</span>
                     </div>
 
                     <button onclick="toggleHint(2)" class="btn-warning">💡 PISTA</button>
 
                     <div class="hint-box" id="hint2">
-                        <strong>PISTA:</strong> Intenta inyectar etiquetas &lt;script&gt;. 
-                        Ejemplo: <code>&lt;script&gt;alert('XSS')&lt;/script&gt;</code>
+                        <strong>💡 PISTA AVANZADA:</strong><br>
+                        El sistema inserta tu búsqueda directamente en el DOM.<br>
+                        <strong>Payloads de prueba:</strong><br>
+                        • <code>&lt;script&gt;alert('XSS')&lt;/script&gt;</code><br>
+                        • <code>&lt;img src=x onerror=alert(1)&gt;</code><br>
+                        • <code>&lt;svg onload=alert('XSS')&gt;</code>
                     </div>
 
                     <div id="xssSuccess" class="hidden-panel" style="margin-top: 1rem;">
                         <div class="alert alert-success">
-                            <strong>✓ XSS EJECUTADO</strong><br>
-                            Script detectado y ejecutado correctamente.
+                            <strong>✓ XSS EJECUTADO CON ÉXITO ✓</strong><br>
+                            El script se ejecutó en el contexto de la página vulnerable.
                         </div>
                         <div class="flag">
                             FLAG{XSS_REFLECTED_HACKER}
                         </div>
-                        <button onclick="nextLevel(3)" class="btn-danger">CONTINUAR AL NIVEL 3 →</button>
+                        <button onclick="nextLevel(3)" class="btn-danger">➡️ CONTINUAR AL NIVEL 3 ⬅️</button>
                     </div>
                 </div>
             </div>
@@ -881,50 +1012,58 @@
             <!-- Challenge 3: XSS Almacenado -->
             <div class="card hidden-panel" id="challenge3">
                 <div class="card-header">
-                    <div class="card-title">💾 NIVEL 3: XSS Almacenado</div>
+                    <div class="card-title">💾 NIVEL 3: Cross-Site Scripting (XSS) Almacenado</div>
                     <span class="badge badge-locked" id="badge3">BLOQUEADO</span>
                 </div>
                 <div class="card-body">
                     <p style="margin-bottom: 1rem; color: var(--secondary);">
-                        Los comentarios se guardan sin filtrar. Inyecta un payload que se 
-                        ejecute cuando otro usuario (bot admin) visite la página.
+                        Los comentarios se almacenan en la base de datos sin sanitizar.
+                        Cuando el administrador revisa los comentarios, tu payload se ejecutará.
                     </p>
+
+                    <div class="alert alert-warning">
+                        <strong>🎯 OBJETIVO:</strong> Inyectar un payload XSS que se ejecute cuando el admin visite la página.
+                    </div>
 
                     <form onsubmit="return addComment(event)">
                         <div class="form-group">
-                            <label>Nombre</label>
+                            <label>👤 Nombre</label>
                             <input type="text" id="commentName" placeholder="Tu nombre" required>
                         </div>
                         <div class="form-group">
-                            <label>Comentario</label>
+                            <label>💬 Comentario</label>
                             <textarea id="commentText" rows="3" placeholder="Escribe tu comentario..." required></textarea>
                         </div>
-                        <button type="submit">PUBLICAR COMENTARIO</button>
+                        <button type="submit">📤 PUBLICAR COMENTARIO</button>
                         <button type="button" class="btn-warning" onclick="toggleHint(3)">💡 PISTA</button>
                         <button type="button" onclick="simulateAdminVisit()" class="btn-danger" style="margin-left: 0.5rem;">🤖 SIMULAR VISITA ADMIN</button>
                     </form>
 
                     <div class="hint-box" id="hint3">
-                        <strong>PISTA:</strong> Usa <code>&lt;img src=x onerror="alert('XSS')"&gt;</code> 
-                        o <code>&lt;script&gt;document.location='/?flag='&lt;/script&gt;</code>
+                        <strong>💡 PISTA AVANZADA:</strong><br>
+                        El admin revisa los comentarios automáticamente.<br>
+                        <strong>Payloads persistentes:</strong><br>
+                        • <code>&lt;img src=x onerror="alert('XSS')"&gt;</code><br>
+                        • <code>&lt;script&gt;document.location='/?flag='+document.cookie&lt;/script&gt;</code><br>
+                        • <code>&lt;iframe src="javascript:alert(1)"&gt;</code>
                     </div>
 
                     <div class="comments-section" id="commentsSection">
                         <div class="comment">
-                            <div class="comment-author">Admin</div>
-                            <div class="comment-text">Bienvenidos al sistema de comentarios. Estoy revisando periódicamente.</div>
+                            <div class="comment-author">👑 Admin</div>
+                            <div class="comment-text">Bienvenidos al sistema de comentarios. Estoy revisando periódicamente. 🕵️</div>
                         </div>
                     </div>
 
                     <div id="storedXssSuccess" class="hidden-panel" style="margin-top: 1rem;">
                         <div class="alert alert-success">
-                            <strong>✓ XSS ALMACENADO DETECTADO</strong><br>
+                            <strong>✓ XSS ALMACENADO DETECTADO ✓</strong><br>
                             El payload se ejecutó durante la visita del administrador.
                         </div>
                         <div class="flag">
                             FLAG{STORED_XSS_PERSISTENT}
                         </div>
-                        <button onclick="nextLevel(4)" class="btn-danger">CONTINUAR AL NIVEL 4 →</button>
+                        <button onclick="nextLevel(4)" class="btn-danger">➡️ CONTINUAR AL NIVEL 4 ⬅️</button>
                     </div>
                 </div>
             </div>
@@ -932,21 +1071,25 @@
             <!-- Challenge 4: Sensitive Data Exposure -->
             <div class="card hidden-panel" id="challenge4">
                 <div class="card-header">
-                    <div class="card-title">🔑 NIVEL 4: Exposición de Datos Sensibles</div>
+                    <div class="card-title">🔑 NIVEL 4: Exposición de Información Sensible</div>
                     <span class="badge badge-locked" id="badge4">BLOQUEADO</span>
                 </div>
                 <div class="card-body">
                     <p style="margin-bottom: 1rem; color: var(--secondary);">
-                        Los desarrolladores dejaron información sensible en el código frontend.
-                        Inspecciona el código fuente para encontrar credenciales ocultas.
+                        Los desarrolladores dejaron información sensible en el código fuente.
+                        Inspecciona el frontend para encontrar credenciales ocultas.
                     </p>
+
+                    <div class="alert alert-warning">
+                        <strong>🎯 OBJETIVO:</strong> Encontrar credenciales de administrador expuestas en el código.
+                    </div>
 
                     <button onclick="toggleSource()" class="btn-warning">👁️ VER CÓDIGO FUENTE</button>
 
                     <div class="source-viewer" id="sourceViewer">
                         <div class="source-line">
                             <span class="line-number">1</span>
-                            <span class="line-content"><span class="code-comment">// Configuración del sistema - NO BORRAR</span></span>
+                            <span class="line-content"><span class="code-comment">// Configuración del sistema - ¡NO BORRAR! (TODO: Mover a variables de entorno)</span></span>
                         </div>
                         <div class="source-line">
                             <span class="line-number">2</span>
@@ -962,7 +1105,7 @@
                         </div>
                         <div class="source-line">
                             <span class="line-number">5</span>
-                            <span class="line-content">  <span class="code-comment">// TODO: Remover antes de producción</span></span>
+                            <span class="line-content">  <span class="code-comment">// ⚠️ ADVERTENCIA: Credenciales hardcodeadas - Remover antes de producción</span></span>
                         </div>
                         <div class="source-line">
                             <span class="line-number">6</span>
@@ -970,7 +1113,7 @@
                         </div>
                         <div class="source-line">
                             <span class="line-number">7</span>
-                            <span class="line-content">  adminPass: <span class="code-string">"S3cr3tP@ss2024!"</span>, <span class="code-comment">// FLAG{CREDENTIALS_EXPOSED}</span></span>
+                            <span class="line-content">  adminPass: <span class="code-string">"S3cr3tP@ss2024!"</span>, <span class="code-comment">// 🔑 FLAG{CREDENTIALS_EXPOSED}</span></span>
                         </div>
                         <div class="source-line">
                             <span class="line-number">8</span>
@@ -984,31 +1127,33 @@
 
                     <form onsubmit="return checkAdminCreds(event)" style="margin-top: 1rem;">
                         <div class="form-group">
-                            <label>Usuario Admin</label>
+                            <label>👑 Usuario Admin</label>
                             <input type="text" id="adminUserInput" placeholder="¿Encontraste el usuario?">
                         </div>
                         <div class="form-group">
-                            <label>Contraseña</label>
+                            <label>🔑 Contraseña</label>
                             <input type="password" id="adminPassInput" placeholder="¿Y la contraseña?">
                         </div>
-                        <button type="submit">VERIFICAR CREDENCIALES</button>
+                        <button type="submit">✓ VERIFICAR CREDENCIALES</button>
                         <button type="button" class="btn-warning" onclick="toggleHint(4)">💡 PISTA</button>
                     </form>
 
                     <div class="hint-box" id="hint4">
-                        <strong>PISTA:</strong> Revisa el código fuente de la página (Ctrl+U). 
-                        Busca comentarios o variables con "admin", "password", "secret", etc.
+                        <strong>💡 PISTA:</strong><br>
+                        Revisa el código fuente de la página presionando <code>Ctrl+U</code> o <code>F12</code>.<br>
+                        Busca palabras clave como: "admin", "password", "secret", "key", "token".<br>
+                        <strong>Tip:</strong> También revisa los comentarios HTML y JavaScript.
                     </div>
 
                     <div id="credsSuccess" class="hidden-panel" style="margin-top: 1rem;">
                         <div class="alert alert-success">
-                            <strong>✓ CREDENCIALES VÁLIDAS</strong><br>
-                            Has encontrado datos expuestos en el frontend.
+                            <strong>✓ CREDENCIALES VÁLIDAS ✓</strong><br>
+                            Has encontrado información sensible expuesta en el frontend.
                         </div>
                         <div class="flag">
                             FLAG{CREDENTIALS_EXPOSED}
                         </div>
-                        <button onclick="nextLevel(5)" class="btn-danger">CONTINUAR AL NIVEL 5 →</button>
+                        <button onclick="nextLevel(5)" class="btn-danger">➡️ CONTINUAR AL NIVEL 5 ⬅️</button>
                     </div>
                 </div>
             </div>
@@ -1016,58 +1161,65 @@
             <!-- Challenge 5: Hidden Admin Panel -->
             <div class="card hidden-panel" id="challenge5">
                 <div class="card-header">
-                    <div class="card-title">📂 NIVEL 5: Panel Admin Oculto</div>
+                    <div class="card-title">📂 NIVEL 5: Directorios Ocultos y Panel Admin</div>
                     <span class="badge badge-locked" id="badge5">BLOQUEADO</span>
                 </div>
                 <div class="card-body">
                     <p style="margin-bottom: 1rem; color: var(--secondary);">
-                        Existe un panel de administración oculto en <code>/admin</code>.
-                        Encuentra la forma de acceder y obtener la flag maestra.
+                        Existe un panel de administración oculto en el sistema.
+                        Debes descubrir cómo acceder usando la terminal o explorando el sitio.
                     </p>
+
+                    <div class="alert alert-warning">
+                        <strong>🎯 OBJETIVO:</strong> Acceder al panel de administración oculto y obtener la flag.
+                    </div>
 
                     <div id="adminPanelSection">
                         <div class="alert alert-warning">
-                            El panel está oculto. Usa la terminal o encuentra el enlace secreto.
+                            <strong>💡 PISTA:</strong> Usa la terminal de la derecha y prueba el comando <code>admin</code><br>
+                            o busca referencias a "admin" en el código fuente.
                         </div>
                         <button onclick="toggleHint(5)" class="btn-warning">💡 PISTA</button>
                     </div>
 
                     <div class="hint-box" id="hint5">
-                        <strong>PISTA:</strong> Intenta acceder mediante la terminal con el comando 
-                        <code>admin</code> o busca en el código fuente referencias a "admin".
+                        <strong>💡 PISTA AVANZADA:</strong><br>
+                        • En la terminal, escribe <code>admin</code> para acceder directamente.<br>
+                        • También puedes probar <code>ls</code> para listar archivos ocultos.<br>
+                        • Los paneles admin suelen estar en rutas como <code>/admin</code>, <code>/administrator</code>.
                     </div>
 
                     <!-- Simulated Admin Panel -->
                     <div id="adminPanel" class="hidden-panel admin-panel" style="margin-top: 1rem;">
                         <div class="card-header" style="background: rgba(255, 0, 64, 0.2);">
-                            <div class="card-title" style="color: var(--alert);">🔒 PANEL DE ADMINISTRACIÓN</div>
+                            <div class="card-title" style="color: var(--alert);">🔒 PANEL DE ADMINISTRACIÓN - ACCESO AUTORIZADO</div>
                         </div>
                         <div class="card-body">
                             <div class="alert alert-error">
-                                <strong>ACCESO RESTRINGIDO - SOLO PERSONAL AUTORIZADO</strong>
+                                <strong>⚠️ ZONA RESTRINGIDA - SOLO PERSONAL AUTORIZADO ⚠️</strong>
                             </div>
                             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1rem 0;">
                                 <div style="padding: 1rem; background: var(--darker); border: 1px solid var(--alert); text-align: center;">
                                     <div style="font-size: 2rem;">👥</div>
-                                    <div style="font-size: 0.8rem; color: var(--secondary);">Usuarios</div>
+                                    <div style="font-size: 0.8rem; color: var(--secondary);">Usuarios Activos</div>
                                     <div style="font-size: 1.5rem; color: var(--alert);">1,337</div>
                                 </div>
                                 <div style="padding: 1rem; background: var(--darker); border: 1px solid var(--alert); text-align: center;">
                                     <div style="font-size: 2rem;">🚨</div>
-                                    <div style="font-size: 0.8rem; color: var(--secondary);">Alertas</div>
+                                    <div style="font-size: 0.8rem; color: var(--secondary);">Alertas de Seguridad</div>
                                     <div style="font-size: 1.5rem; color: var(--alert);">42</div>
                                 </div>
                                 <div style="padding: 1rem; background: var(--darker); border: 1px solid var(--alert); text-align: center;">
                                     <div style="font-size: 2rem;">🔐</div>
-                                    <div style="font-size: 0.8rem; color: var(--secondary);">Secrets</div>
-                                    <div style="font-size: 1.5rem; color: var(--alert);">TOP</div>
+                                    <div style="font-size: 0.8rem; color: var(--secondary);">Secretos Descubiertos</div>
+                                    <div style="font-size: 1.5rem; color: var(--alert);">TOP SECRET</div>
                                 </div>
                             </div>
                             <div class="flag" style="border-color: var(--alert); color: var(--alert);">
                                 FLAG{ADMIN_PANEL_PWNED}
                             </div>
                             <button onclick="nextLevel(6)" class="btn-danger" style="width: 100%; margin-top: 1rem;">
-                                OBTENER FLAG FINAL →
+                                🏆 OBTENER FLAG FINAL 🏆
                             </button>
                         </div>
                     </div>
@@ -1077,22 +1229,31 @@
             <!-- Challenge 6: Final Flag -->
             <div class="card hidden-panel" id="challenge6">
                 <div class="card-header">
-                    <div class="card-title">🏆 NIVEL 6: Maestro del Hacking</div>
+                    <div class="card-title">🏆 NIVEL 6: Maestro del Hacking Ético</div>
                     <span class="badge badge-completed" id="badge6">COMPLETADO</span>
                 </div>
                 <div class="card-body" style="text-align: center;">
-                    <div style="font-size: 4rem; margin-bottom: 1rem;">🎉</div>
-                    <h2 style="color: var(--primary); margin-bottom: 1rem;">¡FELICIDADES!</h2>
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">🎉🏆🎉</div>
+                    <h2 style="color: var(--primary); margin-bottom: 1rem;">¡FELICIDADES, HACKER ÉTICO!</h2>
                     <p style="color: var(--secondary); margin-bottom: 2rem;">
                         Has completado todos los desafíos del Web Security Lab.<br>
-                        Demostraste habilidades en SQL Injection, XSS y reconocimiento.
+                        Demostraste habilidades en:<br>
+                        • SQL Injection<br>
+                        • Cross-Site Scripting (XSS)<br>
+                        • Exposición de Información Sensible<br>
+                        • Enumeración de Directorios<br>
                     </p>
                     <div class="flag" style="font-size: 1.5rem; border-width: 3px;">
                         FLAG{MASTER_HACKER_COMPLETE}
                     </div>
-                    <div style="margin-top: 2rem; padding: 1rem; background: rgba(0, 255, 65, 0.1); border: 1px solid var(--primary);">
-                        <strong>LOGROS DESBLOQUEADOS:</strong><br>
-                        <span id="achievementsList"></span>
+                    <div style="margin-top: 2rem; padding: 1rem; background: rgba(0, 255, 65, 0.1); border: 1px solid var(--primary); border-radius: 4px;">
+                        <strong>🏅 LOGROS ESPECIALES DESBLOQUEADOS:</strong><br>
+                        <span id="achievementsList" style="color: var(--primary);"></span>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <strong>📊 ESTADÍSTICAS:</strong><br>
+                        Flags Capturadas: <span id="finalFlagsCount">6</span>/6<br>
+                        Vidas Restantes: <span id="finalLives">3</span><br>
                     </div>
                     <button onclick="resetLab()" class="btn-danger" style="margin-top: 2rem;">
                         🔄 REINICIAR LABORATORIO
@@ -1106,18 +1267,24 @@
         <div class="terminal-column">
             <div class="terminal">
                 <div class="terminal-header">
-                    <span>root@nfwl-lab:~# terminal</span>
+                    <span>root@nfwl-lab:~# terminal_interactive_v2</span>
                     <div class="terminal-buttons">
-                        <span class="terminal-btn red"></span>
+                        <span class="terminal-btn red" onclick="clearTerminal()"></span>
                         <span class="terminal-btn yellow"></span>
                         <span class="terminal-btn green"></span>
                     </div>
                 </div>
                 <div class="terminal-body" id="terminalBody">
                     <div class="terminal-output success">
-                        Web Security Lab v1.0 - NFWL.exe<br>
-                        Sistema iniciado...<br>
-                        Escribe 'help' para ver comandos disponibles.<br>
+                        ╔══════════════════════════════════════════════╗<br>
+                        ║   Web Security Lab v2.0 - NFWL.exe          ║<br>
+                        ║   Ethical Hacking Learning Platform          ║<br>
+                        ╚══════════════════════════════════════════════╝<br>
+                        <br>
+                        Sistema iniciado correctamente...<br>
+                        🎯 Objetivo: Completar los 6 niveles de seguridad<br>
+                        💡 Escribe 'help' para ver comandos disponibles.<br>
+                        <br>
                     </div>
                 </div>
                 <div style="padding: 0 1rem 1rem;">
@@ -1131,25 +1298,51 @@
             <!-- System Logs -->
             <div class="card" style="margin-top: 1rem;">
                 <div class="card-header">
-                    <div class="card-title">📜 Logs del Sistema</div>
+                    <div class="card-title">📜 Logs del Sistema en Tiempo Real</div>
                 </div>
                 <div class="card-body" style="max-height: 200px; overflow-y: auto;" id="systemLogs">
-                    <div class="log-entry">[SYSTEM] Laboratorio iniciado</div>
-                    <div class="log-entry">[SYSTEM] Esperando interacción...</div>
+                    <div class="log-entry">[SYSTEM] Laboratorio iniciado v2.0</div>
+                    <div class="log-entry">[SYSTEM] Nivel 1 desbloqueado - SQL Injection</div>
+                    <div class="log-entry">[SYSTEM] Esperando interacción del usuario...</div>
                 </div>
             </div>
 
             <!-- Quick Commands -->
             <div class="card" style="margin-top: 1rem;">
                 <div class="card-header">
-                    <div class="card-title">⌨️ Comandos Rápidos</div>
+                    <div class="card-title">⌨️ Comandos Rápidos de Terminal</div>
                 </div>
                 <div class="card-body">
-                    <button onclick="executeCommand('help')" style="width: 100%; margin-bottom: 0.5rem;">help</button>
-                    <button onclick="executeCommand('ls')" style="width: 100%; margin-bottom: 0.5rem;">ls</button>
-                    <button onclick="executeCommand('whoami')" style="width: 100%; margin-bottom: 0.5rem;">whoami</button>
-                    <button onclick="executeCommand('hack')" style="width: 100%; margin-bottom: 0.5rem;">hack</button>
-                    <button onclick="executeCommand('admin')" style="width: 100%;">admin</button>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem;">
+                        <button onclick="executeCommand('help')" style="width: 100%;">📖 help</button>
+                        <button onclick="executeCommand('ls')" style="width: 100%;">📁 ls</button>
+                        <button onclick="executeCommand('whoami')" style="width: 100%;">👤 whoami</button>
+                        <button onclick="executeCommand('nmap')" style="width: 100%;">🔍 nmap</button>
+                        <button onclick="executeCommand('hack')" style="width: 100%;">💀 hack</button>
+                        <button onclick="executeCommand('admin')" style="width: 100%;">👑 admin</button>
+                        <button onclick="executeCommand('clear')" style="width: 100%;">🧹 clear</button>
+                        <button onclick="executeCommand('sqlmap')" style="width: 100%;">🗄️ sqlmap</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Info Card -->
+            <div class="card" style="margin-top: 1rem;">
+                <div class="card-header">
+                    <div class="card-title">ℹ️ Información del Laboratorio</div>
+                </div>
+                <div class="card-body">
+                    <div style="font-size: 0.85rem; color: var(--secondary);">
+                        <strong>📚 Vulnerabilidades cubiertas:</strong><br>
+                        • SQL Injection (OWASP A03:2021)<br>
+                        • Cross-Site Scripting (OWASP A03:2021)<br>
+                        • Security Misconfiguration (OWASP A05:2021)<br>
+                        • Sensitive Data Exposure (OWASP A02:2021)<br>
+                        <br>
+                        <strong>🎮 Código Konami:</strong> ↑↑↓↓←→←→ BA<br>
+                        <strong>💾 Progreso guardado:</strong> Automático<br>
+                        <strong>🔒 Entorno:</strong> 100% local y educativo
+                    </div>
                 </div>
             </div>
         </div>
@@ -1159,7 +1352,7 @@
     <div class="modal-overlay" id="modal">
         <div class="modal">
             <div class="modal-header">
-                <span id="modalTitle">Mensaje</span>
+                <span id="modalTitle">🔔 Mensaje del Sistema</span>
                 <button class="close-btn" onclick="closeModal()">×</button>
             </div>
             <div class="modal-body" id="modalBody">
@@ -1170,31 +1363,98 @@
 
     <script>
         /*
-         * Web Security Lab - NFWL.exe
+         * Web Security Lab - NFWL.exe v2.0
          * ENTORNO EDUCATIVO - SOLO PARA FINES DE APRENDIZAJE
          * 
          * Este código simula vulnerabilidades comunes de seguridad web
          * para fines educativos. No contiene código malicioso real.
          * No se conecta a servidores externos ni expone datos reales.
+         * 
+         * Versión: 2.0
+         * Características: Persistencia de datos, sistema de logros, modo Dios
          */
 
         // ==================== ESTADO DEL JUEGO ====================
-        const gameState = {
+        let gameState = {
             level: 1,
             lives: 3,
             flags: [],
             completed: [],
             achievements: [],
             comments: [],
-            konami: false
+            konami: false,
+            godMode: false
         };
+
+        // Cargar estado guardado
+        function loadGameState() {
+            const saved = localStorage.getItem('webSecurityLab');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    gameState = { ...gameState, ...parsed };
+                    // Asegurar que no haya duplicados
+                    gameState.completed = [...new Set(gameState.completed)];
+                    gameState.flags = [...new Set(gameState.flags)];
+                    gameState.achievements = [...new Set(gameState.achievements)];
+                    
+                    // Cargar comentarios guardados
+                    if (gameState.comments && gameState.comments.length > 0) {
+                        const container = document.getElementById('commentsSection');
+                        container.innerHTML = '<div class="comment"><div class="comment-author">👑 Admin</div><div class="comment-text">Bienvenidos al sistema de comentarios. Estoy revisando periódicamente. 🕵️</div></div>';
+                        gameState.comments.forEach(comment => {
+                            const commentDiv = document.createElement('div');
+                            commentDiv.className = 'comment';
+                            commentDiv.innerHTML = `
+                                <div class="comment-author">${escapeHtml(comment.name)}</div>
+                                <div class="comment-text">${comment.text}</div>
+                            `;
+                            container.appendChild(commentDiv);
+                        });
+                    }
+                } catch(e) {
+                    console.error('Error loading game state:', e);
+                }
+            }
+        }
+
+        // Guardar estado
+        function saveGameState() {
+            const toSave = {
+                level: gameState.level,
+                lives: gameState.lives,
+                flags: gameState.flags,
+                completed: gameState.completed,
+                achievements: gameState.achievements,
+                comments: gameState.comments
+            };
+            localStorage.setItem('webSecurityLab', JSON.stringify(toSave));
+        }
 
         // ==================== INICIALIZACIÓN ====================
         document.addEventListener('DOMContentLoaded', () => {
+            loadGameState();
             updateUI();
             setupTerminal();
             setupKonami();
-            addLog('Sistema listo. Nivel 1 desbloqueado.');
+            addLog('Sistema listo. Nivel 1 desbloqueado.', 'info');
+            
+            // Desbloquear niveles completados
+            if (gameState.completed.length > 0) {
+                gameState.completed.forEach(lvl => {
+                    if (lvl < 6) {
+                        const nextChallenge = document.getElementById(`challenge${lvl + 1}`);
+                        if (nextChallenge) {
+                            nextChallenge.classList.remove('hidden-panel');
+                        }
+                    }
+                });
+                if (gameState.completed.includes(5)) {
+                    document.getElementById('challenge6').classList.remove('hidden-panel');
+                }
+                gameState.level = Math.max(...gameState.completed) + 1;
+                updateUI();
+            }
         });
 
         // ==================== SISTEMA DE NIVELES ====================
@@ -1216,18 +1476,35 @@
             
             if (!gameState.flags.includes(flags[level - 2])) {
                 gameState.flags.push(flags[level - 2]);
-                showAchievement(`Nivel ${level - 1} Completado`, `Flag capturada: ${flags[level - 2]}`);
+                showAchievement(`🎉 Nivel ${level - 1} Completado 🎉`, `Flag capturada: ${flags[level - 2]}`);
+                
+                // Logros especiales
+                if (level - 1 === 1) unlockAchievement('SQL Injection Master');
+                if (level - 1 === 2) unlockAchievement('XSS Hunter');
+                if (level - 1 === 3) unlockAchievement('Persistent Attacker');
+                if (level - 1 === 4) unlockAchievement('Code Inspector');
+                if (level - 1 === 5) unlockAchievement('Admin Breacher');
             }
 
             // Desbloquear siguiente nivel
-            const nextChallenge = document.getElementById(`challenge${level}`);
-            if (nextChallenge) {
-                nextChallenge.classList.remove('hidden-panel');
-                nextChallenge.scrollIntoView({ behavior: 'smooth' });
-                addLog(`Nivel ${level} desbloqueado`);
+            if (level <= 6) {
+                const nextChallenge = document.getElementById(`challenge${level}`);
+                if (nextChallenge) {
+                    nextChallenge.classList.remove('hidden-panel');
+                    nextChallenge.scrollIntoView({ behavior: 'smooth' });
+                    addLog(`✅ Nivel ${level} desbloqueado`, 'success');
+                }
             }
 
             updateUI();
+            saveGameState();
+            
+            if (level === 7) {
+                document.getElementById('finalFlagsCount').textContent = gameState.flags.length;
+                document.getElementById('finalLives').textContent = gameState.lives;
+                const achievementsHtml = gameState.achievements.map(a => `🏅 ${a}`).join('<br>');
+                document.getElementById('achievementsList').innerHTML = achievementsHtml || 'Ninguno aún';
+            }
         }
 
         function updateUI() {
@@ -1235,7 +1512,7 @@
             document.getElementById('currentLevel').textContent = gameState.level;
             
             // Actualizar vidas
-            const hearts = '❤️'.repeat(gameState.lives) + '🖤'.repeat(3 - gameState.lives);
+            const hearts = gameState.godMode ? '♾️'.repeat(3) : '❤️'.repeat(gameState.lives) + '🖤'.repeat(3 - gameState.lives);
             document.getElementById('livesDisplay').innerHTML = hearts;
             
             // Actualizar progreso
@@ -1250,16 +1527,18 @@
             gameState.completed.forEach(lvl => {
                 const badge = document.getElementById(`badge${lvl}`);
                 if (badge) {
-                    badge.textContent = 'COMPLETADO';
+                    badge.textContent = '✓ COMPLETADO ✓';
                     badge.className = 'badge badge-completed';
                 }
             });
             
             // Actualizar badge actual
-            const currentBadge = document.getElementById(`badge${gameState.level}`);
-            if (currentBadge && !gameState.completed.includes(gameState.level)) {
-                currentBadge.textContent = 'ACTIVO';
-                currentBadge.className = 'badge badge-unlocked';
+            if (gameState.level <= 6) {
+                const currentBadge = document.getElementById(`badge${gameState.level}`);
+                if (currentBadge && !gameState.completed.includes(gameState.level)) {
+                    currentBadge.textContent = '⚡ ACTIVO ⚡';
+                    currentBadge.className = 'badge badge-unlocked';
+                }
             }
         }
 
@@ -1271,28 +1550,28 @@
             const pass = document.getElementById('loginPass').value;
             
             // Simulación de vulnerabilidad SQL Injection
-            // En un sistema real, esto sería: SELECT * FROM users WHERE username='$user' AND password='$pass'
             const sqlPattern = /'.*OR.*['"].*=.*['"].*--?/i;
             const sqlPattern2 = /'.*OR.*1\s*=\s*1/i;
             const sqlPattern3 = /admin'--/i;
+            const sqlPattern4 = /'\s*OR\s+'1'\s*=\s*'1/i;
             
-            if (sqlPattern.test(user) || sqlPattern2.test(user) || sqlPattern3.test(user) || 
+            if (sqlPattern.test(user) || sqlPattern2.test(user) || sqlPattern3.test(user) || sqlPattern4.test(user) ||
                 (user.includes("'") && user.toLowerCase().includes('or'))) {
                 
-                addLog('SQL Injection detectado en login', 'warning');
+                addLog('🚨 SQL Injection detectado en el formulario de login', 'warning');
                 document.getElementById('loginSuccess').classList.add('active');
-                terminalOutput('Bypass de autenticación exitoso. Bienvenido, administrador.', 'success');
+                terminalOutput('✅ Bypass de autenticación exitoso. Bienvenido, administrador.', 'success');
                 return false;
             }
             
-            // Verificar credenciales hardcodeadas (otra vulnerabilidad)
+            // Verificar credenciales hardcodeadas
             if (user === 'admin' && pass === 'admin123') {
-                showModal('Acceso Denegado', 'Contraseña incorrecta. Pista: Prueba con SQL Injection.');
+                showModal('Acceso Denegado', '❌ Contraseña incorrecta. Pista: Prueba con SQL Injection como: <code>\' OR \'1\'=\'1</code>');
                 loseLife();
                 return false;
             }
             
-            showModal('Error', 'Credenciales inválidas. Intenta usar SQL Injection para bypass.');
+            showModal('Error de Autenticación', '❌ Credenciales inválidas. Intenta usar SQL Injection para bypass.<br><br>💡 Ejemplo: <code>\' OR \'1\'=\'1\' --</code>');
             loseLife();
             return false;
         }
@@ -1302,22 +1581,23 @@
             const output = document.getElementById('xssOutput');
             
             // Simulación de vulnerabilidad XSS reflejado
-            // El sistema inserta el input directamente en el DOM sin sanitizar
-            output.innerHTML = `Buscando: ${value}`;
+            output.innerHTML = `🔍 Buscando: ${value}`;
             
             // Detectar payload XSS
             const xssPattern = /<script\b[^>]*>([\s\S]*?)<\/script>/i;
             const xssPattern2 = /javascript:/i;
             const xssPattern3 = /on\w+\s*=/i;
             const xssPattern4 = /<img[^>]+onerror\s*=/i;
+            const xssPattern5 = /<svg[^>]+onload\s*=/i;
             
             if (xssPattern.test(value) || xssPattern2.test(value) || 
-                xssPattern3.test(value) || xssPattern4.test(value)) {
+                xssPattern3.test(value) || xssPattern4.test(value) || xssPattern5.test(value)) {
                 
                 setTimeout(() => {
                     document.getElementById('xssSuccess').classList.add('active');
-                    addLog('XSS Reflejado ejecutado', 'warning');
-                    terminalOutput('¡XSS detectado! Script ejecutado en el contexto de la página.', 'success');
+                    addLog('⚠️ XSS Reflejado ejecutado correctamente', 'warning');
+                    terminalOutput('🎯 ¡XSS detectado! Script ejecutado en el contexto de la página.', 'success');
+                    unlockAchievement('XSS Discoverer');
                 }, 500);
             }
         }
@@ -1328,6 +1608,10 @@
             
             const name = document.getElementById('commentName').value;
             const text = document.getElementById('commentText').value;
+            
+            // Guardar comentario
+            gameState.comments.push({ name: escapeHtml(name), text: text });
+            saveGameState();
             
             // Agregar comentario sin sanitización (vulnerable)
             const commentDiv = document.createElement('div');
@@ -1343,8 +1627,8 @@
             document.getElementById('commentName').value = '';
             document.getElementById('commentText').value = '';
             
-            addLog('Nuevo comentario agregado');
-            terminalOutput('Comentario publicado. Esperando revisión del admin...', 'info');
+            addLog(`📝 Nuevo comentario de: ${name}`, 'info');
+            terminalOutput('✅ Comentario publicado. Esperando revisión del administrador...', 'info');
             
             return false;
         }
@@ -1355,17 +1639,18 @@
             
             comments.forEach(comment => {
                 const text = comment.innerHTML;
-                if (/<script|javascript:|on\w+\s*=|<img[^>]+onerror/i.test(text)) {
+                if (/<script|javascript:|on\w+\s*=|<img[^>]+onerror|<svg[^>]+onload/i.test(text)) {
                     xssFound = true;
                 }
             });
             
             if (xssFound) {
                 document.getElementById('storedXssSuccess').classList.add('active');
-                addLog('Admin visitó la página - XSS ejecutado', 'error');
-                terminalOutput('ALERTA: XSS almacenado detectado durante visita del administrador', 'error');
+                addLog('🤖 Admin visitó la página - XSS almacenado ejecutado', 'error');
+                terminalOutput('⚠️ ALERTA: XSS almacenado detectado durante la visita del administrador', 'error');
+                unlockAchievement('Persistent XSS Master');
             } else {
-                showModal('Simulación', 'El administrador visitó la página pero no se detectó XSS. Intenta inyectar código JavaScript en un comentario.');
+                showModal('Simulación de Admin', '🤖 El administrador visitó la página pero no se detectó XSS.<br><br>💡 Intenta inyectar código JavaScript en un comentario, por ejemplo:<br><code>&lt;img src=x onerror=alert("XSS")&gt;</code>');
             }
         }
 
@@ -1373,7 +1658,7 @@
         function toggleSource() {
             const viewer = document.getElementById('sourceViewer');
             viewer.classList.toggle('visible');
-            addLog('Código fuente inspeccionado');
+            addLog('👁️ Código fuente inspeccionado', 'info');
         }
 
         function checkAdminCreds(event) {
@@ -1385,10 +1670,11 @@
             // Credenciales expuestas en el código fuente
             if (user === 'superadmin' && pass === 'S3cr3tP@ss2024!') {
                 document.getElementById('credsSuccess').classList.add('active');
-                addLog('Credenciales expuestas verificadas', 'warning');
-                terminalOutput('Acceso concedido con credenciales encontradas en frontend', 'success');
+                addLog('🔑 Credenciales expuestas verificadas correctamente', 'warning');
+                terminalOutput('✅ Acceso concedido con credenciales encontradas en el frontend', 'success');
+                unlockAchievement('Secret Finder');
             } else {
-                showModal('Error', 'Credenciales incorrectas. Revisa el código fuente cuidadosamente.');
+                showModal('Error', '❌ Credenciales incorrectas. Revisa el código fuente cuidadosamente (Ctrl+U).<br><br>💡 Busca variables como "adminUser" y "adminPass".');
                 loseLife();
             }
             
@@ -1417,6 +1703,11 @@
             });
         }
 
+        function clearTerminal() {
+            document.getElementById('terminalBody').innerHTML = '';
+            terminalOutput('🧹 Terminal limpiada', 'success');
+        }
+
         function executeCommand(command) {
             const args = command.split(' ');
             const cmd = args[0].toLowerCase();
@@ -1428,113 +1719,141 @@
             cmdLine.innerHTML = `<span style="color: var(--secondary);">root@nfwl:~$</span> ${command}`;
             terminalBody.appendChild(cmdLine);
             
-            addLog(`Comando ejecutado: ${command}`);
+            addLog(`💻 Comando ejecutado: ${command}`, 'info');
             
             // Procesar comando
             switch(cmd) {
                 case 'help':
                     terminalOutput(`
-Comandos disponibles:
-  help          - Muestra esta ayuda
-  ls            - Lista archivos del sistema
-  whoami        - Muestra usuario actual
-  cat [file]    - Muestra contenido de archivo
-  hack          - Inicia secuencia de hacking
-  admin         - Accede al panel de administración
-  clear         - Limpia la terminal
-  nmap          - Escanea puertos (simulado)
-  sqlmap        - Herramienta de SQL Injection
-  exit          - Cierra sesión
+╔══════════════════════════════════════════════════════════╗
+║  COMANDOS DISPONIBLES                                    ║
+╠══════════════════════════════════════════════════════════╣
+║  help          - Muestra esta ayuda                      ║
+║  ls            - Lista archivos del sistema              ║
+║  whoami        - Muestra usuario actual                  ║
+║  cat [file]    - Muestra contenido de archivo            ║
+║  hack          - Inicia secuencia de hacking             ║
+║  admin         - Accede al panel de administración       ║
+║  clear         - Limpia la terminal                      ║
+║  nmap          - Escanea puertos (simulado)              ║
+║  sqlmap        - Herramienta de SQL Injection            ║
+║  exit          - Cierra sesión                           ║
+╚══════════════════════════════════════════════════════════╝
                     `, 'info');
                     break;
                     
                 case 'ls':
                     terminalOutput(`
-drwxr-xr-x  root  root  4096  config/
-drwxr-xr-x  root  root  4096  logs/
--rw-r--r--  root  root  1337  flag.txt
--rw-r--r--  root  root  2048  users.db
--rwxr-xr-x  root  root  512   secret_script.sh
+📁 drwxr-xr-x  root  root  4096  config/
+📁 drwxr-xr-x  root  root  4096  logs/
+📄 -rw-r--r--  root  root  1337  flag.txt
+📄 -rw-r--r--  root  root  2048  users.db
+🔧 -rwxr-xr-x  root  root  512   secret_script.sh
+📁 drwxr-xr-x  root  root  4096  admin/
                     `, 'success');
                     break;
                     
                 case 'whoami':
-                    terminalOutput('root', 'success');
+                    terminalOutput('👤 root (privilegios de superusuario)', 'success');
                     break;
                     
                 case 'cat':
                     if (args[1] === 'flag.txt') {
-                        terminalOutput('FLAG{TERMINAL_MASTER}', 'success');
+                        terminalOutput('🏁 FLAG{TERMINAL_MASTER_SECRET}', 'success');
                         unlockAchievement('Terminal Master');
                     } else if (args[1] === 'users.db') {
-                        terminalOutput('Error: Base de datos encriptada. Intenta SQL Injection.', 'error');
+                        terminalOutput('🗄️ Error: Base de datos encriptada. Intenta SQL Injection en el formulario de login.', 'error');
+                    } else if (args[1] === 'secret_script.sh') {
+                        terminalOutput(`#!/bin/bash
+echo "Ejecutando script secreto..."
+echo "🔑 La contraseña del admin es: S3cr3tP@ss2024!"
+echo "🎯 El panel admin está oculto, prueba el comando 'admin'"`, 'success');
                     } else {
-                        terminalOutput('Archivo no encontrado', 'error');
+                        terminalOutput(`❌ Archivo no encontrado: ${args[1]}`, 'error');
                     }
                     break;
                     
                 case 'hack':
                     terminalOutput(`
-[+] Iniciando secuencia de hacking...
-[+] Escaneando objetivo...
-[+] Vulnerabilidad encontrada: SQL Injection
-[+] Vulnerabilidad encontrada: XSS
-[+] Recomendación: Usa los formularios de la izquierda para explotar
+[+] Iniciando secuencia de hacking ético...
+[+] Escaneando objetivo: localhost
+[+] Vulnerabilidad encontrada: SQL Injection (Nivel 1)
+[+] Vulnerabilidad encontrada: XSS Reflejado (Nivel 2)
+[+] Vulnerabilidad encontrada: XSS Almacenado (Nivel 3)
+[+] Vulnerabilidad encontrada: Exposición de datos (Nivel 4)
+[+] Vulnerabilidad encontrada: Panel Admin oculto (Nivel 5)
+[+] Recomendación: Completa los niveles en orden para obtener todas las flags.
                     `, 'success');
                     break;
                     
                 case 'admin':
-                    if (gameState.level >= 5) {
+                    if (gameState.level >= 5 || gameState.completed.includes(4)) {
                         document.getElementById('adminPanel').classList.add('active');
-                        document.getElementById('adminPanelSection').style.display = 'none';
-                        terminalOutput('Accediendo al panel de administración...', 'success');
-                        addLog('Acceso a panel admin mediante terminal', 'warning');
+                        const adminSection = document.getElementById('adminPanelSection');
+                        if (adminSection) adminSection.style.display = 'none';
+                        terminalOutput('🔓 Accediendo al panel de administración...', 'success');
+                        addLog('👑 Acceso a panel admin mediante terminal', 'warning');
                         document.getElementById('adminPanel').scrollIntoView({ behavior: 'smooth' });
+                        if (!gameState.completed.includes(4)) {
+                            unlockAchievement('Admin Panel Discoverer');
+                        }
                     } else {
-                        terminalOutput('Error: Nivel 5 no desbloqueado. Completa los desafíos anteriores.', 'error');
+                        terminalOutput('❌ Error: Nivel 5 no desbloqueado. Completa los niveles 1-4 primero.', 'error');
                     }
                     break;
                     
                 case 'clear':
-                    terminalBody.innerHTML = '';
+                    clearTerminal();
                     break;
                     
                 case 'nmap':
                     terminalOutput(`
-Starting Nmap scan...
-PORT     STATE SERVICE
-22/tcp   open  ssh
-80/tcp   open  http
-3306/tcp open  mysql
-8080/tcp open  http-proxy
+🔍 Starting Nmap 7.92 scan...
+📡 Scanning localhost (127.0.0.1)...
 
-Vulnerabilities detected on port 80:
-- SQL Injection possible
-- XSS vulnerabilities found
+PORT     STATE    SERVICE    VULNERABILITY
+22/tcp   open     ssh        -
+80/tcp   open     http       SQL Injection, XSS
+3306/tcp open     mysql      -
+8080/tcp open     http-proxy -
+
+🔐 VULNERABILITIES DETECTED:
+• SQL Injection possible on login form
+• Reflected XSS on search functionality
+• Stored XSS on comments section
+• Sensitive data exposed in source code
+• Hidden admin panel (/admin)
+
+💡 Use specific tools or manual testing to exploit these.
                     `, 'info');
                     break;
                     
                 case 'sqlmap':
                     terminalOutput(`
-sqlmap detected this as a test environment.
-No real database connections available.
-Try the login form manually with SQL injection payloads.
+🗄️ sqlmap - automatic SQL injection tool
+[INFO] Testing connection to target...
+[INFO] Target: http://localhost/login
+[INFO] Parameter: username (POST)
+[INFO] Vulnerability detected! Parameter is vulnerable to boolean-based blind injection.
+
+💡 Manual payload: ' OR '1'='1' --
+💡 Try it on the login form in Level 1!
                     `, 'warning');
                     break;
                     
                 case 'exit':
-                    terminalOutput('Cerrando sesión...', 'info');
+                    terminalOutput('🔌 Cerrando sesión... Hasta pronto, hacker!', 'info');
                     setTimeout(() => location.reload(), 1000);
                     break;
                     
                 default:
                     if (cmd.startsWith('./')) {
-                        terminalOutput(`Ejecutando ${cmd}...`, 'info');
+                        terminalOutput(`🚀 Ejecutando ${cmd}...`, 'info');
                         setTimeout(() => {
-                            terminalOutput('Script ejecutado. No se encontraron vulnerabilidades adicionales.', 'success');
+                            terminalOutput('✅ Script ejecutado. No se encontraron vulnerabilidades adicionales.', 'success');
                         }, 1000);
                     } else {
-                        terminalOutput(`Comando no encontrado: ${cmd}. Escribe 'help' para ver comandos disponibles.`, 'error');
+                        terminalOutput(`❌ Comando no encontrado: ${cmd}. Escribe 'help' para ver comandos disponibles.`, 'error');
                     }
             }
             
@@ -1546,7 +1865,7 @@ Try the login form manually with SQL injection payloads.
             const terminalBody = document.getElementById('terminalBody');
             const output = document.createElement('div');
             output.className = `terminal-output ${type}`;
-            output.textContent = text;
+            output.innerHTML = text.replace(/\n/g, '<br>');
             terminalBody.appendChild(output);
             terminalBody.scrollTop = terminalBody.scrollHeight;
         }
@@ -1555,11 +1874,11 @@ Try the login form manually with SQL injection payloads.
         function toggleHint(num) {
             const hint = document.getElementById(`hint${num}`);
             hint.classList.toggle('visible');
-            addLog(`Pista ${num} consultada`);
+            addLog(`💡 Pista ${num} consultada`, 'info');
         }
 
         function showModal(title, body) {
-            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalTitle').innerHTML = title;
             document.getElementById('modalBody').innerHTML = body;
             document.getElementById('modal').classList.add('active');
         }
@@ -1569,16 +1888,24 @@ Try the login form manually with SQL injection payloads.
         }
 
         function loseLife() {
-            gameState.lives--;
-            updateUI();
-            
-            if (gameState.lives <= 0) {
-                showModal('Game Over', 'Has perdido todas tus vidas. El laboratorio se reiniciará.');
-                setTimeout(resetLab, 2000);
+            if (!gameState.godMode) {
+                gameState.lives--;
+                updateUI();
+                saveGameState();
+                
+                addLog(`💔 Vida perdida. Vidas restantes: ${gameState.lives}`, 'error');
+                
+                if (gameState.lives <= 0) {
+                    showModal('💀 GAME OVER 💀', 'Has perdido todas tus vidas. El laboratorio se reiniciará en 3 segundos.<br><br>💡 Recuerda: Puedes usar el código Konami para modo Dios (↑↑↓↓←→←→ BA)');
+                    setTimeout(resetLab, 3000);
+                }
+            } else {
+                addLog('🛡️ Modo Dios activado - No pierdes vidas', 'success');
             }
         }
 
         function resetLab() {
+            localStorage.removeItem('webSecurityLab');
             location.reload();
         }
 
@@ -1590,10 +1917,15 @@ Try the login form manually with SQL injection payloads.
             const timestamp = new Date().toLocaleTimeString();
             const typePrefix = type === 'error' ? '[ERROR]' : type === 'warning' ? '[WARN]' : '[INFO]';
             
-            entry.textContent = `[${timestamp}] ${typePrefix} ${message}`;
+            entry.innerHTML = `[${timestamp}] ${typePrefix} ${message}`;
             logs.insertBefore(entry, logs.firstChild);
             
             setTimeout(() => entry.classList.remove('new'), 1000);
+            
+            // Limitar logs
+            while (logs.children.length > 50) {
+                logs.removeChild(logs.lastChild);
+            }
         }
 
         function escapeHtml(text) {
@@ -1605,8 +1937,8 @@ Try the login form manually with SQL injection payloads.
         // ==================== LOGROS ====================
         function showAchievement(title, desc) {
             const achievement = document.getElementById('achievement');
-            document.getElementById('achievementText').textContent = desc;
-            achievement.querySelector('.achievement-title').textContent = `🏆 ${title}`;
+            document.getElementById('achievementText').innerHTML = desc;
+            achievement.querySelector('.achievement-title').innerHTML = `🏆 ${title}`;
             
             achievement.classList.add('show');
             setTimeout(() => achievement.classList.remove('show'), 5000);
@@ -1615,7 +1947,9 @@ Try the login form manually with SQL injection payloads.
         function unlockAchievement(name) {
             if (!gameState.achievements.includes(name)) {
                 gameState.achievements.push(name);
-                showAchievement(name, '¡Logro especial desbloqueado!');
+                saveGameState();
+                showAchievement(name, '✨ ¡Logro especial desbloqueado! ✨');
+                addLog(`🏅 Logro desbloqueado: ${name}`, 'success');
             }
         }
 
@@ -1641,15 +1975,23 @@ Try the login form manually with SQL injection payloads.
 
         function activateKonami() {
             gameState.konami = true;
+            gameState.godMode = true;
             document.getElementById('konami').classList.add('active');
-            gameState.lives = 99;
+            gameState.lives = 999;
             updateUI();
-            terminalOutput('🎮 KONAMI CODE ACTIVADO - MODO DIOS HABILITADO', 'success');
+            terminalOutput('🎮🎮🎮 KONAMI CODE ACTIVADO - MODO DIOS HABILITADO 🎮🎮🎮', 'success');
+            terminalOutput('🛡️ Vidas infinitas activadas | Todos los niveles desbloqueados', 'success');
             unlockAchievement('Konami Master');
+            
+            // Desbloquear todos los niveles en modo Dios
+            for (let i = 2; i <= 6; i++) {
+                const challenge = document.getElementById(`challenge${i}`);
+                if (challenge) challenge.classList.remove('hidden-panel');
+            }
             
             setTimeout(() => {
                 document.getElementById('konami').classList.remove('active');
-            }, 3000);
+            }, 4000);
         }
 
         // Cerrar modal al hacer clic fuera
@@ -1660,24 +2002,27 @@ Try the login form manually with SQL injection payloads.
         });
 
         // ==================== COMENTARIOS INICIALES ====================
-        // Agregar algunos comentarios de ejemplo
         window.addEventListener('load', () => {
-            const initialComments = [
-                { name: 'Usuario123', text: 'Gran sistema!' },
-                { name: 'HackerBoy', text: 'Alguien ha probado <b>negritas</b> aquí?' },
-                { name: 'Admin', text: 'Revisando comentarios regularmente...' }
-            ];
-            
-            const container = document.getElementById('commentsSection');
-            initialComments.forEach(c => {
-                const div = document.createElement('div');
-                div.className = 'comment';
-                div.innerHTML = `
-                    <div class="comment-author">${escapeHtml(c.name)}</div>
-                    <div class="comment-text">${c.text}</div>
-                `;
-                container.appendChild(div);
-            });
+            if (!gameState.comments || gameState.comments.length === 0) {
+                const initialComments = [
+                    { name: '👤 Usuario123', text: '¡Excelente sistema! 🔥' },
+                    { name: '🐱‍👤 HackerBoy', text: '¿Alguien ha probado <b>inyecciones</b> aquí?' },
+                    { name: '👑 Admin', text: 'Revisando comentarios regularmente... 🕵️' }
+                ];
+                
+                const container = document.getElementById('commentsSection');
+                initialComments.forEach(c => {
+                    const div = document.createElement('div');
+                    div.className = 'comment';
+                    div.innerHTML = `
+                        <div class="comment-author">${escapeHtml(c.name)}</div>
+                        <div class="comment-text">${c.text}</div>
+                    `;
+                    container.appendChild(div);
+                    gameState.comments.push(c);
+                });
+                saveGameState();
+            }
         });
     </script>
 </body>
